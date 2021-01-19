@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/studioPackagesModel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/studioPackagesModel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @summary Studio Packages Model
+ * @description The studio packages model handles retrieving, storing,
+ * deleting, or modifying studio packages related data in the database.
+ * @module studioPackagesModel
+ * @requires pg-promise
+ * @see studioPackagesController
+ * @author hautonjt
+ */
+
+var pgp = require("pg-promise")();
+var db = pgp(process.env.DATABASE_URL);
+
+/* jshint esnext: true */
+
+/**
+ * @summary The number of milliseconds in 1 day.
+ * @constant
+ * @default
+ */
+const MILLISECONDS_IN_1_DAY = 24 * 60 * 60 * 1000;
+const PACKAGE_RESERVATION_TIMEOUT = "3 hours";
+
+/**
+ * @summary Converts integer in cents to a formatted money string
+ * @description This function will take a number as input, interpreted
+ * as an integer denoting the number of cents, and convert it into a
+ * dollar-and-cents representation as a string. For example, an input of
+ * 520 should output $5.20 as the return string.
+ * @param  {integer} moneyInCents The number of cents as an integer.
+ * @return {string} A formatted money string.
+ */
+function convertToMoney(moneyInCents) {
+  var moneyString = moneyInCents.toString();
+  while(moneyString.length &lt; 3) { // if less than a dollar, add padding zeros
+    moneyString = "0" + moneyString;
+  }
+  return "$" + moneyString.slice(0, -2) + "." + moneyString.slice(-2);
+}
+
+module.exports = {
+  /**
+   * Inserts a packageContents JSON object into the database.
+   * The function returns a JSON object in the callback,
+   * which has fields {"status", "result"}.
+   * "status" is set to "SUCCESS" if the insertion is successful,
+   * otherwise it will be set to "FAIL: " along with an error message.
+   * "result" will be set to an object containing the ID of the package
+   * in the database and an array of all the inserted photograph IDs if
+   * the insertion succeeds, and null if it does not.
+   * @summary Inserts the data in packageContents into the database.
+   * @param {int} studioId The ID of the studio that owns the package.
+   * @param {Object} packageContents - defines a JSON object with all the
+   * data fields for a package
+   * @param {string} packageContents.package_name  - The name of the package
+   * @param {string} packageContents.start_date - The start date of the package
+   * in a string format that can be converted to a Date object.
+   * @param {int} packageContents.number_of_days - number of days
+   * that a single booking of a package should last in integer days.
+   * @param {string} packageContents.start_time - The start time of package
+   * in a string format that can be converted to a Date object.
+   * @param {int} packageContents.book_before - The number of days before the
+   * start date of a package that defines the deadline in which
+   * a package can no longer be booked in integer days.
+   * @param {int} packageContents.price - The amount of money the package
+   * should cost in cents as an integer.
+   * @param {string} packageContents.description - A brief description of
+   * the package in string format.
+   * @param {string[]} packageContents.tags - An array of tags that will be
+   * categorize the package.
+   * @param {Object} packagePhoto - The default photograph that will be
+   * displayed for the package.
+   * @param {string} packagePhoto.description - A brief description
+   * of the photograph.
+   * @param {string} packagePhoto.path_string - The URL the photograph
+   * is located in.
+   * @param {responseCallback} callback - The callback that handles the response
+   * @todo Rewrite package creation using data modifying CTEs.
+   */
+  createPackage: function(studioId, packageContents, packagePhoto, callback) {
+    // dynamically build sql query using the packageContents object
+    var keysToInsert = ["studio_id"];
+    var valuesToInsert = [studioId];
+    for (var property in packageContents) {
+      if (!packageContents.hasOwnProperty(property)) {
+        continue;
+      }
+      if (packageContents[property] !== undefined) {
+        keysToInsert.push(property);
+        if (property === "price"){
+
+          // TODO: solve the crashing issue
+          //valuesToInsert.push(convertToMoney(packageContents[property]));
+          valuesToInsert.push((packageContents[property]));
+        } else if (property === "number_of_days" ||
+                   property === "book_before") {
+          valuesToInsert.push(packageContents[property] + " days");
+        } else if (property === "start_date" ||
+                   property === "start_time") {
+          valuesToInsert.push(new Date(packageContents[property]));
+        } else {
+          valuesToInsert.push(packageContents[property]);
+        }
+      }
+    }
+    var query = "INSERT INTO studio_package(";
+    query += keysToInsert.join(", ");
+    query += ") VALUES (";
+    // construct placeholders for values
+    var placeholderValues = [];
+    for (var j = 0; j &lt; keysToInsert.length; ++j) {
+      placeholderValues.push("$" + (j + 1));
+    }
+    query += placeholderValues.join(", ");
+    query += ") RETURNING package_id";
+
+    var package_id;
+    // insert the all packageContents fields except photos
+    db.one(query, valuesToInsert).catch(function(error) {
+      throw "Error inserting packages: " + error;
+    }).then(function(result) {
+      package_id = result.package_id;
+      return db.one("INSERT INTO studio_photographs " +
+        "(studio_id, package_id, description, path_string) " +
+        "VALUES ($1, $2, $3, $4) RETURNING photograph_id",
+      [studioId, result.package_id, packagePhoto.description,
+        packagePhoto.path_string])
+      .catch(function(error) {
+        throw "Error inserting image: " + error;
+      });
+    }).then(function(image_result) {
+      return db.one("INSERT INTO studio_default_photograph " +
+        "(studio_id, package_id, photograph_id) VALUES " +
+        "($1, $2, $3) RETURNING photograph_id",
+      [studioId, package_id, image_result.photograph_id])
+      .catch(function(error) {
+        throw "Error setting default image: " + error;
+      });
+    }).then(function(set_default_result) {
+      callback({
+        "status": "SUCCESS",
+        "result": {
+          "package_id": package_id,
+          "studio_id": studioId,
+        }
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Create package failed: " + error);
+    });
+  },
+
+  addPhoto: function(studioId, packageId,
+    photographId, packagePhoto, callback) {
+    callback({
+      "status": "FAIL: add photo stubbed",
+      "result": null
+    });
+  },
+
+  /**
+   * Modifies a package in the database by replacing the data fields in the row
+   * with the data in the packageContents JSON object. This function cannot
+   * modify any photographs that may be linked to the package.
+   * The function returns a JSON object in the callback,
+   * which has fields {"status", "result"}.
+   * "status" is set to "SUCCESS" if the modification is successful,
+   * otherwise it will be set to "FAIL: " along with an error message.
+   * "result" is always set to null.
+   * @summary Modifies a package by studio, package id, and packageContents.
+   * @param {int} studioId The ID of the studio that owns the package.
+   * @param {int} packageId The ID of the package to modify
+   * @param {Object} packageContents - defines a JSON object with all the
+   * data fields for a package
+   * @param {string} packageContents.name  - The name of the package
+   * @param {string} packageContents.start_date - The start date of the package
+   * in a string format that can be converted to a Date object.
+   * @param {int} packageContents.number_of_days - number of days
+   * that a single booking of a package should last in integer days.
+   * @param {string} packageContents.start_time - The start time of package
+   * in a string format that can be converted to a Date object.
+   * @param {int} packageContents.book_before - The number of days before the
+   * start date of a package that defines the deadline in which
+   * a package can no longer be booked in integer days.
+   * @param {int} packageContents.price - The amount of money the package
+   * should cost in cents as an integer.
+   * @param {string} packageContents.description - A brief description of
+   * the package in string format.
+   * @param {string[]} packageContents.tags - An array of tags that will be
+   * categorize the package.
+   * @param {Object} packageContents.location - A JSON location object
+   * compatible with the Google Maps Geolocation API
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+
+  modifyPackage: function(studioId, packageId, packageContents, callback) {
+
+    // dynamically build sql query using the packageContents object
+    var keysToUpdate = [];
+    var valuesToUpdate = [];
+    for (var property in packageContents) {
+      if (!packageContents.hasOwnProperty(property)) {
+        continue;
+      }
+      if (packageContents[property] !== undefined) {
+        keysToUpdate.push(property);
+        if (property === "price"){
+          valuesToUpdate.push(convertToMoney(packageContents[property]));
+        } else if (property === "number_of_days" ||
+                   property === "book_before") {
+          valuesToUpdate.push(packageContents[property] + " days");
+        } else if (property === "start_date" ||
+                   property === "start_time") {
+          valuesToUpdate.push(new Date(packageContents[property]));
+        } else {
+          valuesToUpdate.push(packageContents[property]);
+        }
+      }
+    }
+
+    var query = "UPDATE studio_package SET(";
+    query += keysToUpdate.join(", ");
+    query += ") = (";
+    // construct placeholders for values
+    var placeholderValues = [];
+    for (var j = 0; j &lt; keysToUpdate.length; ++j) {
+      placeholderValues.push("$" + (j + 1));
+    }
+    query += placeholderValues.join(", ");
+    query += ") where studio_id = $" + (j + 1) +
+             " and package_id = $"   + (j + 2);
+
+    var package_id;
+    // update the all packageContents fields
+    db.none(query, valuesToUpdate.concat(studioId, packageId))
+    .then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: Error updating package: " + error,
+        "result": null
+      });
+      console.log("Update package failed: " + error);
+    });
+  },
+
+  changeDefaultPhotoOfPackage: function() {
+    callback({
+      "status": "FAIL: change default photo stubbed",
+      "result": null
+    });
+  },
+
+  modifyPhoto: function(studioId, packageId, photographId,
+  photoContents, callback) {
+    callback({
+      "status": "FAIL: modify photo stubbed",
+      "result": null
+    });
+  },
+
+  /**
+   * Gets one or more packages from the databse by studioId and packageId
+   * The function returns a JSON object in the callback,
+   * which has fields {"status", "result"}.
+   * "status" is set to "SUCCESS" if the query is successful,
+   * otherwise it will be set to "FAIL: " along with an error message.
+   * "result" is set to null if the query is unsucessful, otherwise it will
+   * be an object if packageId is not null. Otherwise,
+   * it will be an array of all packageContents objects that corresponds to
+   * the studioId.
+   * @summary Gets package data by studio and package id.
+   * @param {int} studioId The ID of the studio that owns the package.
+   * @param {int} packageId The ID of the package to get, if null, it returns
+   * all the packages of a studio.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  getPackage: function(studioId, packageId, callback) {
+    // sql query returns an array of JSON objects representing photographs
+    // as well as a default_photo_id showing which photograph is default
+    var db_promise;
+    var query =
+      "SELECT s.*, p.photos, defp.photograph_id AS default_photo_id " +
+      "FROM (SELECT studio_id, package_id, " +
+            "json_agg(row_to_json(studio_photographs)) AS photos " +
+            "FROM studio_photographs " +
+            "GROUP BY studio_id, package_id) p " +
+      "NATURAL JOIN studio_default_photograph defp " +
+      "NATURAL JOIN studio_package s " +
+      "WHERE s.studio_id = $1";
+    if (packageId !== undefined) {
+      query += " OR s.package_id = $2";
+      db_promise = db.one(query, [studioId, packageId]);
+    } else {
+      db_promise = db.query(query, [studioId]);
+    }
+    db_promise.then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: get package failed: " + error,
+        "result": null
+      });
+      console.log("Get package failed: " + error);
+    });
+  },
+
+  searchByDay: function(day_as_string, callback) {
+    var startDay = new Date(day_as_string);
+    //var endDay = new Date(day_as_string);
+    startDay.setHours(0);
+    startDay.setMinutes(0);
+    startDay.setSeconds(0);
+    startDay.setMilliseconds(0);
+    startDay = startDay.getTime();
+    /*
+    endDay.setHours(23);
+    endDay.setMinutes(59);
+    endDay.setSeconds(59);
+    endDay.setMilliseconds(999);
+    endDay = endDay.getTime();
+    */
+    var endDay = startDay + MILLISECONDS_IN_1_DAY;
+    db.any("SELECT * FROM studio_package " +
+           "WHERE start_date >= to_timestamp($1::double precision/1000) " +
+           "AND start_date &lt; to_timestamp($2::double precision / 1000)",
+      [startDay, endDay])
+    .then(function(result){
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: searching failed: " + error,
+        "result": null
+      });
+    });
+  },
+
+
+  /**
+   *
+   * @summary Gets one or more packages from the databse by search terms and date
+   * @param startDate, endDate as TimeStamp
+   * @param search terms
+   */
+  searchByCriteria: function(searchStartDate, searchEndDate, searchTag,
+    searchStudioName, searchPackageName, callback) {
+
+    if (searchStudioName===""){
+      searchStudioName="*";
+    }
+    if (searchPackageName===""){
+      searchPackageName="*";
+    }
+    if (searchTag===""){
+      searchTag="*";
+    }
+
+    var startDateTime = new Date(searchStartDate);
+    startDateTime = startDateTime.getTime();
+    var endDateTime = new Date(searchEndDate);
+    endDateTime = endDateTime.getTime();
+
+    // search for packages according to search criteria
+    db.any(/*"SELECT * FROM studio_package P " +
+            "INNER JOIN studio_profile S ON P.studio_id = S.studio_id " +
+           "WHERE start_date >= to_timestamp($1::double precision/1000) " +
+           "AND start_date &lt; to_timestamp($2::double precision / 1000) " +
+           "AND ( to_tsquery(package_name) @> to_tsquery($3) " +
+           "OR $5 = ANY (P.tags) " +
+           "OR to_tsquery($4) @> to_tsquery(S.studio_name) ) ",
+      [startDateTime, endDateTime, searchPackageName, searchStudioName, searchTag]*/
+            "SELECT * FROM studio_package p "+
+            "INNER JOIN studio_profile s ON p.studio_id = s.studio_id " +
+            "WHERE NOT EXISTS ( " +
+              "SELECT booking_id " +
+              "FROM package_booking b " +
+              "WHERE b.studio_id = p.studio_id " +
+                "AND b.package_id = p.package_id" +
+            ") AND start_date >= to_timestamp($1::double precision/1000) " +
+            "AND start_date &lt; to_timestamp($2::double precision / 1000) ",
+            [startDateTime, endDateTime])
+    .then(function(result){
+
+      //console.log(result);
+      for (var i=0; i&lt;result.length; ++i) {
+        console.log("for each results");
+        console.log(result[i]);
+        var tagFound = false;
+        console.log(result[i].tags);
+        if (result[i].tags)
+        {
+          console.log("for tags");
+          for (var j=0; j&lt;result[i].tags.length; ++j) {
+            console.log("for each tags");
+            if (!(searchTag.indexOf(result[i].tags[j]))) {
+              console.log("tag found");
+              tagFound=true;
+              break;
+            }
+          }
+        }
+
+        if(!(searchPackageName.indexOf(result[i].package_name)) ||
+           !(searchStudioName.indexOf(result[i].studio_name)) ||
+           tagFound || searchPackageName==="*") {
+          console.log("found!");
+        }
+        else {
+          console.log("not found!");
+          result.splice(i, 1);
+          --i;
+        }
+
+      }
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      console.log(error);
+      callback({
+        "status": "FAIL: searching failed: " + error,
+        "result": null
+      });
+    });
+  },
+  /**
+   * Deletes one or more packages from the database by studioId and packageId
+   * The function returns a JSON object in the callback,
+   * which has fields {"status", "result"}.
+   * "status" is set to "SUCCESS" if the query is successful,
+   * otherwise it will be set to "FAIL: " along with an error message.
+   * "result" is always set to null.
+   * @summary Deletes a package by studio and package id.
+   * @param {int} studioId The ID of the studio that owns the package.
+   * @param {int} packageId The ID of the package to delete, if null, deletes
+   * all packages a studio has.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  deletePackage: function(studioId, packageId, callback) {
+    // ensure default photo is deleted
+    db.none("DELETE FROM studio_default_photograph WHERE studio_id = $1 AND " +
+    "package_id = $2", [studioId, packageId]).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      throw error;
+    }).then(function(result) {
+      // ensure all other photos are deleted
+      return db.none("DELETE FROM studio_photographs " +
+      "WHERE studio_id = $1 AND package_id = $2",
+      [studioId, packageId]).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      // delete package
+      return db.none("DELETE FROM studio_package " +
+      "WHERE studio_id = $1 AND package_id = $2",
+      [studioId, packageId]).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Delete package failed: " + error);
+    });
+  },
+
+  /**
+   *
+   * @summary Insert into booking table
+   * @param studioId
+   * @param bookingPackages an array of packages to be booked
+   */
+  createBooking: function(customerId, bookingPackages, callback) {
+    console.log("Booking packages: " + JSON.stringify(bookingPackages));
+    db.tx(function(t) {
+      var queries =
+        // delete unconfirmed packages that are greater than
+        // package reservation timeout
+        [this.none("DELETE FROM package_booking " +
+                   "WHERE confirmed = FALSE and " +
+                     "now() - time_reserved > $1::interval",
+                   PACKAGE_RESERVATION_TIMEOUT)];
+      for (var i = 0; i &lt; bookingPackages.length; ++i) {
+        console.log("create booking with customer " + customerId +
+                    ", studioId " + bookingPackages[i].studioId +
+                    ", packageId " + bookingPackages[i].packageId);
+        // if package successfully booked, should return one row
+        // this.one checks for exactly one row returning
+        queries.push(this.one(
+          "INSERT INTO package_booking (studio_id, package_id, customer_id) " +
+          "SELECT $1, $2, $3 " +
+          // do not insert if package has been booked
+          "WHERE NOT EXISTS ( " +
+            "SELECT booking_id " +
+            "FROM package_booking b " +
+            "WHERE studio_id = $1 AND package_id = $2 " +
+          ") RETURNING booking_id",
+          [bookingPackages[i].studioId,
+            bookingPackages[i].packageId, customerId]));
+      }
+      return this.batch(queries);
+    }).catch(function(error) {
+      console.log("FAIL: " + JSON.stringify(error));
+      throw "at least one of the requested packages " +
+            "do not exist or has been booked.";
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+    });
+  },
+
+  /**
+   * Confirms the bookings of the customer
+   * @param  integer  customerId      [description]
+   * @param  Array    bookingPackages [description]
+   * @param  Function callback        [description]
+   */
+  confirmBooking: function(customerId, bookingPackages, callback) {
+    db.tx(function(t) {
+      var queries = [];
+      for (var i = 0; i &lt; bookingPackages.length; ++i) {
+        queries.push(this.one("UPDATE package_booking SET confirmed = TRUE " +
+                              "WHERE studio_id = $1 AND package_id = $2 " +
+                              "RETURNING booking_id",
+                              [bookingPackages[i].studioId,
+                               bookingPackages[i].packageId]));
+      }
+      return this.batch(queries);
+    }).catch(function(error) {
+      console.log(error);
+      //throw JSON.stringify(error);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+    });
+  },
+
+  /**
+   *
+   * @summary Get list of packages by refering to cusomer bookings
+   * @param customerId
+   * @callback list of studio_packages in customer booking list
+   */
+  getBooking: function(customerId, callback) {
+    //console.log("get list of bookings with customer "+customerId);
+
+    db.query("SELECT * FROM package_booking B "+
+          "INNER JOIN studio_package P ON P.package_id = B.package_id "+
+          //"INNER JOIN studio_default_photograph defp ON P.studio_id = defp.studio_id "+
+          "WHERE customer_id = $1",
+          [customerId])
+    .then(function(result){
+      console.log("TODO: how do I select photograph by joining");
+
+      // temporary solution, just to keep the program from crashing
+      //TODO: need to actually select photos and id
+      for (var i=0; i&lt;result.length; ++i)
+      {
+        (result[i]).photos = [];
+        (result[i]).default_photo_id = 0;
+      }
+      callback({
+        "status": "FAIL: still working on it",
+        "result": result
+      });
+
+
+    }, function(err){
+      console.log(err);
+      callback({
+        "status": "FAIL: "+err,
+        "result": null
+      });
+    });
+  }
+
+};
+
+
+
+
+/**
+ * The response callback called when a studio package model function
+ * sends data back to the studio package controller.
+ * @summary Response callback to studio package controller.
+ * @callback responseCallback
+ * @param {Object} data - The data that the studio package controller receives.
+ * @param {string} data.status - The status of the function. It is set to
+ * "SUCCESS" if function executed successfully, otherwise it is set to "FAIL: "
+ * followed by the error message.
+ * @param {Object} data.result - Returns the expected result of the
+ * function. Refer to the function documentation to see the possible
+ * values for this field.
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: scryptHelperModules</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: scryptHelperModules</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Wraps common scrypt and database patterns into promises for
+convenience.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>hautonjt</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_helper_modules_scryptHelperModule.js.html">models/helper_modules/scryptHelperModule.js</a>, <a href="models_helper_modules_scryptHelperModule.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>messagesController</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".hashPassword"><span class="type-signature">(static) </span>hashPassword<span class="signature">(password)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+    <p class="summary">Wraps scrypt hash function in a promise object.</p>
+    
+
+
+
+<div class="description">
+    <p>This function wraps scrypt.kdf in a Promise object to encapsulate
+the usage of scrypt functions from the account models.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The password to hash.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_helper_modules_scryptHelperModule.js.html">models/helper_modules/scryptHelperModule.js</a>, <a href="models_helper_modules_scryptHelperModule.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The promise object will be resolved with the hash of
+the password if the password is hashed successfully, and
+rejected with an error if it is not.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".updatePwdHashQuery"><span class="type-signature">(static) </span>updatePwdHashQuery<span class="signature">(db, table, username, password, passwordHash)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+    <p class="summary">Updates password_hash in database.</p>
+    
+
+
+
+<div class="description">
+    <p>This function rehashes the current password and updates the password hash
+stored in the database with it. This is useful if the scrypt parameters
+in the website change.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>db</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The database object from pg-promise.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>table</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The table to update the password hash for, eg.
+&quot;customer_account&quot;.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username of the account whose password should
+be updated.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The current password of the account.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passwordHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The current password hash of the account.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_helper_modules_scryptHelperModule.js.html">models/helper_modules/scryptHelperModule.js</a>, <a href="models_helper_modules_scryptHelperModule.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The promise object will be resolved with &quot;SUCCESS&quot;
+if the password hash does not require a re-hash, or if the password hash
+has been successfully updated. The object will be rejected with an
+error message if the hash function fails or the password hash cannot be
+updated in the database for some reason.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".verifyPwdFromQuery"><span class="type-signature">(static) </span>verifyPwdFromQuery<span class="signature">(queryPromise, password)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+    <p class="summary">Verifies password hash from query promise.</p>
+    
+
+
+
+<div class="description">
+    <p>This function will verify a password hash from a SELECT query with
+the password passed in as a parameter using scrypt.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>queryPromise</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Promise</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>This is a promise whose onFulfilled handle
+will return an object with a passwordHash field.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The password to check the passwordHash against.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_helper_modules_scryptHelperModule.js.html">models/helper_modules/scryptHelperModule.js</a>, <a href="models_helper_modules_scryptHelperModule.js.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The promise object will be resolved if the password is
+successful, and the result will be the result of the SELECT query.
+If either the SELECT query fails or the password does not match the hash,
+the promise will be rejected with an error message.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~checkScryptParamChanges"><span class="type-signature">(inner) </span>checkScryptParamChanges<span class="signature">(hashString)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+    <p class="summary">Checks for scrypt param changes</p>
+    
+
+
+
+<div class="description">
+    <p>Determines if there are differences in scrypt params between the hash string
+and the environment</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>hashString</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The input hash string to extract
+embedded scrypt params</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_helper_modules_scryptHelperModule.js.html">models/helper_modules/scryptHelperModule.js</a>, <a href="models_helper_modules_scryptHelperModule.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Value indicating whether there
+are differences or not</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-scryptHelperModules.html">scryptHelperModules</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li><li><a href="global.html#PASSWORD_RECOVERY_MIN_WAIT_IN_MS">PASSWORD_RECOVERY_MIN_WAIT_IN_MS</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Sun Nov 08 2015 15:08:59 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

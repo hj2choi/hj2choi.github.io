@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Environment Parameters</h1><h4>Please ensure that the following environment variables are set:</h4><p>DATABASE_URL should be set to a suitable database url.<br>The AIRZTUDIO_URL should point to a valid url that will point
+to your current project (this is only needed for payment tests with paypal).<br>Your .env file should look like this:  </p>
+<pre class="prettyprint source lang-bash"><code>DATABASE_URL=...  
+AIRZTUDIO_URL=...  
+SCRYPT_MAX_TIME=0.2  
+SCRYPT_MAX_MEM=0  
+SCRYPT_MAX_MEMFRAC=0.2  
+NODE_PG_FORCE_NATIVE=1  
+GOOGLE_API='AIzaSyBF04lSfpPMeAJD1d47NNeg8HUFn2HKi2g'  
+EMAIL='airztudio.noreply@gmail.com'  
+EMAIL_PASSWORD='fn49D94##a01'  
+SESSION_SECRET='keyboard cat'  
+PAYPAL_CLIENT_ID='AVV8Ub2z6yxrHgtGJZ4jGYE0gnxgqGKhp4y57VG1xuTxCXzc4bm9Jr3woA3CL7AGK6-dttYaAzEZwjbN'  
+PAYPAL_CLIENT_SECRET='ENtiPa5I9AEsBVqcBMrgmDvOop9DECFkPQlNuLWODDkdRf8515p-voEx-SGt1cm21f4UgLfD1BDEMaJg'</code></pre><p>NOTE : When we open up our github repository, remember to remove the API Key
+so that other people don't use our quota.  </p>
+<hr>
+<h1>Style Guidelines</h1><h3>Planning and Coding Standard Guidelines</h3><h4>Planning standards:</h4><ol>
+<li>Before writing any new module or function, the corresponding class diagram must be updated. The class diagram shall be a UML class diagram.  </li>
+<li>Proposed: In addition to the class diagram, a UML sequence diagram of all current routes must also be maintained.  </li>
+</ol>
+<h4>Organizational standards:</h4><ol>
+<li>Files under <code>models/</code> are reserved for functions that directly model some behavior in the server.  </li>
+<li>Files under <code>controllers/</code> are reserved for functions that interface between routes and models.  </li>
+<li>Files under <code>routes/</code> are reserved for functions that route requests to the appropriate render web page calls and manage session logic.  </li>
+</ol>
+<h4>Coding standards:</h4><ol>
+<li>All functions and variable names must use camel casing.</li>
+<li>The documentation generator we are using is <code>JSDoc</code>. All functions must also be documented with the parameters, function, and return type specified using <code>JSDoc</code> syntax. The primary author of the function should also be documented. This must be written before the function is implemented.</li>
+<li>Modules should likewise be documented with a clear purpose.</li>
+<li>All algorithmic functions must include <strong>examples</strong>.</li>
+<li>Algorithmic functions are defined as functions whose purpose is solely to manipulate and format javascript data.<ul>
+<li>Examples of algorithmic functions:<ul>
+<li>date formatters</li>
+<li>array sorting</li>
+<li>sql query sanitizer</li>
+</ul>
+</li>
+<li>Examples of non-algorithmic functions:<ul>
+<li>view tables from a database</li>
+<li>error handlers</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>All incomplete functions must CLEARLY be marked as &quot;stub&quot; in the documentation.  </li>
+<li>All operators, besides function-like operators and increment operators, must be surrounded by spaces (eg, <code>a === b</code> instead of <code>a===b</code>)  </li>
+<li>Braces for a javascript function must start right after the declaration, not on the next line. They must also be separated by a space. eg.    <pre class="prettyprint source lang-javascript"><code>function() {  
+  //code  
+}</code></pre>instead of:    <pre class="prettyprint source lang-javascript"><code>function()  
+{
+  //code  
+}</code></pre></li>
+<li>Braces for non-function keywords (eg. <code>if</code>, <code>switch</code>, <code>for</code>, <code>typeof</code>) must also follow the convention outlined in point 6.  </li>
+<li>For non-function keywords (eg. <code>if</code>, <code>switch</code>, <code>for</code>, <code>typeof</code>), the keyword and the parentheses and braces must be separated by a space. eg.    <pre class="prettyprint source lang-javascript"><code>if (a == b) {  
+  //code  
+} else if (a == c) {  
+  //code  
+} else {  
+  //code  
+}</code></pre>instead of:    <pre class="prettyprint source lang-javascript"><code>if(a==b){  
+  //code   
+}else if(a == c) {  
+  //code   
+} else{  
+  //code  
+}</code></pre></li>
+<li>If statements that do not have parentheses are banned.  </li>
+<li>When calling a function, the parentheses must always be right next to the function name or the function keyword. eg.    <pre class="prettyprint source lang-javascript"><code>function() {  
+  //code  
+}</code></pre>instead of:    <pre class="prettyprint source lang-javascript"><code>function () {  
+  //code   
+}</code></pre></li>
+<li>The length of every line of javascript must not exceed 80 characters. Exceptions will be granted if exceeding 80 characters significantly increases readability, but this exception will be rare.</li>
+<li>When defining objects, every item must be separated by a newline. The brace must also be separated by a newline. All items must be indented as appropriate to its nesting level. Exception will be granted for a small object (less than 15 characters) being fed as a function argument. However, in this case, spaces must be added for the right side of colons, commas and next to braces. eg.    <pre class="prettyprint source lang-javascript"><code>{  
+  &quot;status&quot;: &quot;FAIL: authentication failed&quot;,  
+  &quot;result&quot;: null  
+};</code></pre>or    <pre class="prettyprint source lang-javascript"><code>fun1({ &quot;abc&quot;: &quot;def&quot;, &quot;ghi&quot;: &quot;jkl&quot; });</code></pre>instead of    <pre class="prettyprint source lang-javascript"><code>{&quot;status&quot;:&quot;FAIL: authentication failed&quot;,&quot;result&quot;:null}</code></pre></li>
+<li>All statements must end with a semicolon.  </li>
+<li>All tabs must be soft tabs (&quot;spaces&quot;) of length 2. Avoid using hard (ie. &quot;real&quot;) tabs.  </li>
+<li>Every non-trivial function of a model must be tested. There must be at least two (ideally three) test cases for every domain the input is split into. A domain is defined as a contiguous set of values for which the output of the function is similar.  <ul>
+<li>For example, an absolute value function has two domains, negative numbers and positive numbers. The test cases for the domains should be randomly in the middle of the domain, and at the boundaries of the domain.  </li>
+</ul>
+</li>
+<li><strong>NEVER</strong> push code that breaks others’ code.  </li>
+<li>All strings in javascript must use double quotes instead of the single quote. An exception will be made for strings that contain more than 4 double quotes and no single quotes, in which case the string can be single-quoted to avoid escaping.  </li>
+<li>No magic numbers: please do not put random numbers in the middle of code unless the meaning is obvious. Instead, declare it a <code>const</code> variable at the top of the file give it a suitable name that clearly expresses intent.  </li>
+</ol></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

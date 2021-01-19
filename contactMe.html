@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Hong Joon's personal webpage</title>
+
+    <!--<link rel="stylesheet" type="text/css" href="bootstrap.css">-->
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  </head>
+
+  <body>
+
+
+    <div class="image-contact">
+    </div>
+
+    <div class="learn-more">
+  	  <div class="container">
+    		<div class="row">
+    	    <div class="col-md-12">
+            <font size="3" color="#a00000">Currently looking for internship opportunities, robotics software members, and a girlfriend. Feel free to contact me if interested.</font><br>
+            <br>
+            <h4>Address</h4>
+      			<p>CHOI, Hong Joon<br>
+              UG Hall 2, Rm301R<br>
+              Hong Kong University of Science and Technology<br>
+              Clear Water Bay,<br>
+              Hong Kong<br>
+            </p><br>
+            <h4>Contact No.</h4>
+            <p>+852 5512 5323</p><br>
+            <h4>E-mail</h4>
+            <p>hjchoi@connect.ust.hk<br>hongjoonchoi95@gmail.com</p><br>
+            <h4>Facebook</h4>
+            <a href="https://www.facebook.com/hongjoon.choi.56">https://www.facebook.com/hongjoon.choi.56</a><br>
+  	      </div>
+        </div>
+  	  </div>
+    </div>
+
+    <div id="sidebar" onmouseover="sidebarToggle()" onmouseout="sidebarToggleOut()" class="right-overlap">
+      <div class="container">
+        <div class="row">
+          <div id="sidebarHidden" vertical-align="center" class="right-overlap">
+            <ul class="list-unstyled"  style="padding:10px;">
+              <h3><button type="button" onclick="pinSidebar()" class="btn btn-lg btn-default">⇩ Contact me</button></h3>
+              <li><p><a href="index.html" id="b"><span class="glyphicon glyphicon-home gi-10x"></span></a></p></li>
+              <li><p><a href="myProfile.html"><span class="glyphicon glyphicon-user gi-10x"></span></a></p></li>
+              <li><p><a href="myTimeline.html"><span class="glyphicon glyphicon-road gi-10x"></span></a></p></li>
+              <li><p><a href="compStuff.html"><span class="glyphicon glyphicon-file gi-10x"></span></a></p></li>
+              <li><p><a href="contactMe.html"><span class="glyphicon glyphicon-envelope gi-10x"></span></a></p></li>
+            </ul>
+          </div>
+          <div id="sidebarBack" vertical-align="center" class="right-overlap-menu transparent-back">
+          </div>
+          <div id="sidebarShown" vertical-align="center" class="right-overlap">
+            <ul id="sidebarList" class="fade list-unstyled"  style="padding:10px;">
+              <h3><button type="button" onclick="pinSidebar()" class="btn btn-lg btn-default">⇩ Contact me</button></h3>
+              <li><p><a href="index.html"><span class="glyphicon glyphicon-home"><a href="index.html"style="font-family:Helvetica;">  Profile</a></span></a></p></li>
+              <li><p><a href="myProfile.html"><span class="glyphicon glyphicon-user gi-10x"><a href="myProfile.html"style="font-family:Helvetica;">  Experiences</a></span></a></p></li>
+              <li><p><a href="myTimeline.html"><span class="glyphicon glyphicon-road gi-10x"><a href="myTimeline.html"style="font-family:Helvetica;">  Timeline</a></span></a></p></li>
+              <li><p><a href="compStuff.html"><span class="glyphicon glyphicon-file gi-10x"><a href="compStuff.html"style="font-family:Helvetica;">  Portfolio</a></span></a></p></li>
+              <li><p><a href="contactMe.html"><span class="glyphicon glyphicon-envelope gi-10x"><a href="contactMe.html"style="font-family:Helvetica;">  Contact</a></span></a></p></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div class="sidebar">
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <script>
+    var sidebarPinned=false;
+    function pinSidebar()
+    {
+      sidebarPinned=!sidebarPinned;
+    }
+    function sidebarToggle()
+    {
+      //document.getElementById("sidebarShown").style.visibility = "visible";
+      document.getElementById("sidebarHidden").style.visibility = "hidden";
+      document.getElementById("sidebarBack").style.width = "18%";
+      document.getElementById("sidebarList").style.opacity = "1";
+    }
+    function sidebarToggleOut()
+    {
+      //document.getElementById("sidebarShown").style.visibility = "hidden";
+      if (!sidebarPinned)
+      {
+        document.getElementById("sidebarHidden").style.visibility = "visible";
+        document.getElementById("sidebarBack").style.width = "0%";
+        document.getElementById("sidebarList").style.opacity = "0";
+      }
+    }
+    </script>
+
+
+  </body>
+
+
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/studioAccountController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/studioAccountController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @summary Studio Account controller
+ * @description The studio account controller handles received post requests
+ * for studio accounts and routes the request to the appropriate studio
+ * account model functions.
+ * @module studioAccountController
+ * @requires studioAccountModel
+ */
+
+var studioAccount = require("../models/studioAccountModel.js");
+
+module.exports = {
+  /**
+   * This function is specifically for the QTest modules to use, will switch
+   * the given test to the appropriate module function.
+   * @param {Object} req A request object that contains the parsed test case
+   * information, contains the test's request
+   * @param {Object} res A response object that will be used to send the tests
+   * result back to the QTest page.
+   * @summary Function is used to easily switch test cases to corresponding
+   * function.
+   */
+  test: function(req, res, handler) {
+    switch(req.body.request) {
+      case "create":
+        this.create(req, handler);
+        break;
+      case "delete":
+        this.delete(req, handler);
+        break;
+      case "modify":
+        this.modify(req, handler);
+        break;
+      case "access":
+        this.getAccount(req, handler);
+        break;
+      case "deleteAll":
+        this.deleteAll(handler);
+        break;
+      default:
+        handler({
+          "status": "FAIL: invalid request type",
+          "result": null
+        });
+        break;
+    }
+  },
+  /**
+   * This function will send the profile information of the requested
+   * username to the studio profile view. If the user cannot be found then it
+   * will return the 404 view.
+   * @param {Object} req A request object that contains the parsed test case
+   * information, contains the session information
+   * @param {Object} res A response object that will be used to send the
+   * profile data and the session to the profile view, or render the 404 view
+   * @param {String} username A string object containing the username whose
+   * profile page has been requested
+   * @summary Function is used to extract profile information and send it to
+   * the profile view, returning 404 view if username not found.
+   */
+   /** @todo Abstract out the handler Function
+   */
+  view: function(username, req, res) {
+    sess = req.session;
+    this.getProfile(username, function(data){
+      if(data.status == "SUCCESS") {
+          res.render("../views/pages/studioProfileViewDummy", {
+            "sess": sess,
+            "profileData": data.result
+          });
+      }
+      else {
+        res.render("../views/pages/404");
+      }
+    });
+  },
+  /**
+   * This function will create a studio account, acts as a abstraction layer
+   * between the views and the database calls.
+   * @param {Object} req A request object that contains the username and
+   * password
+   * @param {Function} handler Will return the result of the creation back
+   * to the the view
+   * @summary Function will create a studio account
+   */
+  create: function(req, handler) {
+    studioAccount.createAccount(req.body, handler);
+  },
+  /**
+   * This function will delete a studio account, acts as a abstraction layer
+   * between the views and the database calls.
+   * @param {Object} req A request object that contains the username and
+   * password.
+   * @param {Function} handler Will return the result of the deletion back
+   * to the the view
+   * @summary Function will delete a studio account
+   */
+  delete: function(req, handler) {
+    studioAccount.deleteAccount(req.body.username, req.body.token, handler);
+  },
+  completeDelete: function(req, handler) {
+    studioAccount.deleteAccountAndProfile(req.body.username,
+      req.body.token, handler);
+  },
+  /**
+   * This function will modify a studio account, acts as a abstraction layer
+   * between the views and the database calls.
+   * @param {Object} req A request object that contains the username and
+   * token, as well as which fields are to be modified and what is their
+   * new value
+   * @param {Function} handler Will return the result of the creation back
+   * to the the view
+   * @summary Function will modify a studio account
+   */
+  modify: function(req, handler) {
+    studioAccount.modifyAccount(req.body.username, req.body.token,
+      req.body.fieldType, req.body.newField, handler);
+  },
+  /**
+   * This function will get a studio accounts data, acts as a abstraction
+   * layer between the views and the database calls.
+   * @param {Object} req A request object that contains the username and
+   * password
+   * @param {Function} handler Will return the users account information back
+   * to the view
+   * @summary Function will get a studio accounts information
+   */
+  getAccount: function(req, handler) {
+    studioAccount.accessAccount(req.body.username, req.body.password, handler);
+  },
+  /**
+   * This function will get a studios profile data, acts as a abstraction
+   * layer between the views and the database calls.
+   * @param {Object} req A request object that contains the username
+   * @param {Function} handler Will return the users profile information back
+   * to the view
+   * @summary Function will get a studios profile information
+   */
+  getProfile: function(username, handler) {
+    studioAccount.accessProfile(username, handler);
+  },
+  /**
+   * This function will modify a studios profile data, acts as a abstraction
+   * layer between the views and the database calls.
+   * @param {Object} req A request object that contains the username and
+   * password
+   * @param {Function} handler Will return the users profile information back
+   * to the view
+   * @summary Function will modify a studio accounts information
+   */
+  modifyProfile: function(req, handler) {
+    studioAccount.modifyProfile(req.body, handler);
+  },
+  /**
+   * This function returns all the studio accounts that we have.
+   * @param {Function} handler Will return all the studio accounts to the
+   * view
+   * @summary Function will return all the studio accounts
+   */
+  selectAll: function(handler) {
+    studioAccount.selectAllAccounts(handler);
+  },
+  /**
+  * This function generates an account token for the given studio
+  * @summary Function will generate token
+  */
+  genAccountToken: function(req,handler) {
+    studioAccount.genAccountToken(req.body.username,req.body.email,req.body.minWaitTime,handler);
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

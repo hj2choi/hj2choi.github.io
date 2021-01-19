@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: messagesModel</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: messagesModel</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>The messages account model handles retrieving, storing,
+deleting, or modifying messaging related data for all types
+of accounts in the database.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>hautonjt</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_messagesModel.js.html">models/messagesModel.js</a>, <a href="models_messagesModel.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>messagesController</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:pg-promise</li>
+        </ul>
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".getMessageByID"><span class="type-signature">(static) </span>getMessageByID<span class="signature">(messageId, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary"><p>This function retrieves a message by ID as long as the message has
+not been deleted by the recipient.</p></p>
+    
+
+
+
+<div class="description">
+    <p>This function retrieves a message by ID as long as the message has
+not been deleted by the recipient. This is useful for real-time
+updates to the message view. If this function succeeds, the
+the result object sent to the callback will have a status of &quot;SUCCESS&quot;
+and the result will contain an object with following fields: sender
+(the message user ID of the sender), recipient (the message user ID of the
+recipient), message (the actual contents of the message), date_sent
+(the date and time the message was sent formatted as a JSON string).
+If the function fails, the callback will receive a result object with
+the result field being null, and the status field will be &quot;FAIL: &quot;,
+followed by an error message.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>messageId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ID of the message to retrieve from
+the database.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback executed once the function
+finishes execution.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_messagesModel.js.html">models/messagesModel.js</a>, <a href="models_messagesModel.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".readMessages"><span class="type-signature">(static) </span>readMessages<span class="signature">(msgUserId, startTime, endTime, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary"><p>This function gets all non-deleted messages sent and received for a
+particular message user id that are between the start time and end time.</p></p>
+    
+
+
+
+<div class="description">
+    <p>This function gets all non-deleted messages sent and received for a
+particular message user id that are between the start time and end time.
+If the start time and/or end time are undefined, the start time and end
+time will be set to the epoch and now() respectively. The result of the
+object sent to the callback if readMessage is successful will consist of
+the following fields: msg_user_id (containing the message user id of the
+user that sent or received the messages), account_type (the account type
+of the user referenced by the msg_user_id), message_object_array (an array
+containing all the message objects). The message objects in array consists
+of the following fields: message_type (type of message, received or sent),
+message (contents of the message), date_sent (date message is sent
+formatted as psql JSON).</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>msgUserId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The message user ID of the account</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A string that specifies the earliest time the
+function will retrieve a message.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A string that speicifes the latest time the
+function will retrieve a message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback executed once the function
+finishes execution.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_messagesModel.js.html">models/messagesModel.js</a>, <a href="models_messagesModel.js.html#line69">line 69</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".sendMessage"><span class="type-signature">(static) </span>sendMessage<span class="signature">(sender, recipient, message, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Inserts a message into the database given a sender id and recipient id.</p>
+    
+
+
+
+<div class="description">
+    <p>Inserts a message into the database given a sender id and recipient id.
+The function sends the ID of the message, the message itself, and the
+date the message is sent formatted as a JSON object as the result
+field in the object in callback if the insertion is successful, otherwise
+it will be null. The sucess field will be &quot;SUCCESS&quot; if the insertion
+succeeds, otherwise it will be &quot;FAIL: &quot; followed by an error message.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sender</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>ID of the sender</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>recipient</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>ID of the recipient</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The contents of the message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback executed once the function
+finishes execution.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_messagesModel.js.html">models/messagesModel.js</a>, <a href="models_messagesModel.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

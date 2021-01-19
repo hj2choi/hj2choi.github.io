@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/messagesModel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/messagesModel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @summary Messages Account Model
+ * @description The messages account model handles retrieving, storing,
+ * deleting, or modifying messaging related data for all types
+ * of accounts in the database.
+ * @module messagesModel
+ * @requires pg-promise
+ * @see messagesController
+ * @author hautonjt
+ */
+
+var pgp = require("pg-promise")();
+var db = pgp(process.env.DATABASE_URL);
+
+module.exports = {
+  /**
+   * Inserts a message into the database given a sender id and recipient id.
+   * The function sends the ID of the message, the message itself, and the
+   * date the message is sent formatted as a JSON object as the result
+   * field in the object in callback if the insertion is successful, otherwise
+   * it will be null. The sucess field will be "SUCCESS" if the insertion
+   * succeeds, otherwise it will be "FAIL: " followed by an error message.
+   * @param {integer} sender ID of the sender
+   * @param {integer} recipient ID of the recipient
+   * @param {string} message The contents of the message
+   * @param {responseCallback} callback The callback executed once the function
+   * finishes execution.
+   */
+  sendMessage: function(sender, recipient, message, callback) {
+    // need to check the account types
+    db.one("INSERT INTO messages (sender, recipient, message) VALUES " +
+           "($1, $2, $3) RETURNING message_id, message, " +
+           "to_json(date_sent) AS date_sent",
+           [sender, recipient, message])
+    .then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Send message failed: " + error);
+    });
+  },
+  /**
+   * This function gets all non-deleted messages sent and received for a
+   * particular message user id that are between the start time and end time.
+   * If the start time and/or end time are undefined, the start time and end
+   * time will be set to the epoch and now() respectively. The result of the
+   * object sent to the callback if readMessage is successful will consist of
+   * the following fields: msg_user_id (containing the message user id of the
+   * user that sent or received the messages), account_type (the account type
+   * of the user referenced by the msg_user_id), message_object_array (an array
+   * containing all the message objects). The message objects in array consists
+   * of the following fields: message_type (type of message, received or sent),
+   * message (contents of the message), date_sent (date message is sent
+   * formatted as psql JSON).
+   * @param {integer} msgUserId The message user ID of the account
+   * @param {string} startTime A string that specifies the earliest time the
+   * function will retrieve a message.
+   * @param {string} endTime A string that speicifes the latest time the
+   * function will retrieve a message
+   * @param {responseCallback} callback The callback executed once the function
+   * finishes execution.
+   */
+  readMessages: function(msgUserId, startTime, endTime, callback) {
+    if (startTime === undefined) {
+      startTime = new Date(0); // get epoch
+    } else {
+      startTime = new Date(startTime);
+    }
+    if (endTime === undefined) {
+      endTime = new Date();
+    } else {
+      endTime = new Date(endTime);
+    }
+    startTime = startTime.getTime();
+    endTime = endTime.getTime();
+    // the super advanced CTE query with conditional selection and JSON
+    // aggregation function
+    db.any("WITH msg_data AS ( " +
+             "SELECT message_id, " +
+               "(CASE WHEN recipient = $1 THEN 'received' " +
+                     "WHEN sender = $1 THEN 'sent' END) AS message_type, " +
+               "(CASE WHEN recipient = $1 THEN sender " +
+                     "WHEN sender = $1 THEN recipient END) AS msg_user_id, " +
+               "message, " +
+               "date_sent " +
+             "FROM messages " +
+             "WHERE ((recipient = $1 AND recipient_deleted = false) OR " +
+                    "(sender = $1 AND sender_deleted = false) " +
+                   "AND date_sent > " +
+                     "to_timestamp($2::double precision / 1000) " +
+                   "AND date_sent &lt; " +
+                     "to_timestamp($3::double precision / 1000))) " +
+           "SELECT msg_data.msg_user_id, " +
+             "(CASE WHEN p.relname = 'studio_profile' THEN 'studio' " +
+                   "WHEN p.relname = 'customer_profile' THEN 'customer' " +
+                   "ELSE 'admin' END) as account_type, " +
+             "json_agg((SELECT row_to_json(temp_table) AS msg_object " +
+                         "FROM (SELECT msg_data.message_type, " +
+                                      "msg_data.message, " +
+                                      "msg_data.date_sent) " +
+                         "AS temp_table) " +
+                      "ORDER BY date_sent) AS message_object_array " +
+           "FROM msg_data " +
+             "JOIN messaging_system_user " +
+               "AS m ON (msg_data.msg_user_id = m.msg_user_id) " +
+             "JOIN pg_class AS p ON (m.tableoid = p.oid) " +
+           "WHERE msg_data.msg_user_id IS NOT NULL " +
+           "GROUP BY msg_data.msg_user_id, account_type",
+    [msgUserId, startTime, endTime]).catch(function(error) {
+      callback({
+        "status" : "FAIL: " + error,
+        "result" : null
+      });
+      console.log("Read message fail: " + error);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    });
+  },
+  /**
+   * This function retrieves a message by ID as long as the message has
+   * not been deleted by the recipient. This is useful for real-time
+   * updates to the message view. If this function succeeds, the
+   * the result object sent to the callback will have a status of "SUCCESS"
+   * and the result will contain an object with following fields: sender
+   * (the message user ID of the sender), recipient (the message user ID of the
+   * recipient), message (the actual contents of the message), date_sent
+   * (the date and time the message was sent formatted as a JSON string).
+   * If the function fails, the callback will receive a result object with
+   * the result field being null, and the status field will be "FAIL: ",
+   * followed by an error message.
+   * @param {integer} messageId The ID of the message to retrieve from
+   * the database.
+   * @param {responseCallback} callback The callback executed once the function
+   * finishes execution.
+   */
+  getMessageByID: function(messageId, callback) {
+    db.one("SELECT sender, recipient, message, to_json(date_sent) " +
+           "AS date_sent FROM messages " +
+           "WHERE message_id = $1 AND recipient_deleted = false", messageId)
+    .then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Get message by id failed: " + error);
+    });
+  },
+  // mark all from messages from sender to recipient as read
+  // for individual messages
+  markMessageAsRead: function(sender, recipient, callback) {
+    db.none("UPDATE messages SET read_by_recipient = true WHERE " +
+            "sender = $1 AND recipient = $2", [sender, recipient])
+    .then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Mark message as read failed: " + error);
+    });
+  },
+  // marks messages as deleted
+  recipientMarkMessageAsDeleted: function(messageId, callback) {
+    db.none("UPDATE messages SET recipient_deleted = true WHERE " +
+            "message_id = $1", messageId).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Recipient mark message as deleted failed: " + error);
+    });
+  },
+  // marks messages as deleted
+  senderMarkMessageAsDeleted: function(messageId, callback) {
+    db.none("UPDATE messages SET sender_deleted = true WHERE " +
+            "message_id = $1", messageId).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Recipient mark message as deleted failed: " + error);
+    });
+  },
+  // deletes message from database (testing only)
+  deleteMessage: function(messageId, callback) {
+    db.none("DELETE FROM messages WHERE message_id = $1", messageId)
+    .then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Delete message failed: " + error);
+    });
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

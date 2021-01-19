@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/customerAccountModel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/customerAccountModel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @summary Customer Account Model
+ * @description The customer account model handles retrieving, storing,
+ * deleting, or modifying customer account related data in the database.
+ * @module customerAccountModel
+ * @requires pg-promise
+ * @requires scryptHelperModule
+ * @requires randomModule
+ * @see customerAccountController
+ */
+
+var pgp = require("pg-promise")();
+var db = pgp(process.env.DATABASE_URL);
+var scryptHelper = require("./helper_modules/scryptHelperModule.js");
+var random = require("./helper_modules/randomModule.js");
+
+/* jshint esnext: true */
+
+/**
+ * @summary The minimum password length allowed for an account.
+ * @constant
+ * @default
+ */
+const MIN_PASSWORD_LENGTH = 8;
+/**
+ * @summary The lifetime of a generated account token.
+ * @constant
+ * @default
+ */
+const ACCOUNT_TOKEN_EXPIRY_IN_MS = 24 * 60 * 60 * 1000;
+
+module.exports = {
+  /**
+   * This function creates an account and profile with the username, password,
+   * and profile data specified in the accountInfo object and inserts it into
+   * the database. The "status" field of the result object will be set to
+   * "SUCCESS" if the function succeeds, therwise it will be set the "FAIL: "
+   * followed by an error message. The "result" field is always set to null.
+   * @summary  Creates an account and profile in the db given username and
+   * password.
+   * @param {Object} accountInfo The object that holds all the account
+   * and profile data to be inserted to the database.
+   * @param {string} accountInfo.username The username for the account to
+   * be created.
+   * @param {string} accountInfo.password The password for the account to
+   * be created.
+   * @param {string} accountInfo.first_name The first name to be stored in
+   * the profile.
+   * @param {string} accountInfo.last_name The last name to be stored in
+   * the profile.
+   * @param {string} accountInfo.profile_description A description of the
+   * profile.
+   * @param {string} accountInfo.email The email of the profile.
+   * @param {string} accountInfo.timezone A string representing the full name
+   * of a timezone to be recorded in the profile.
+   * @param {boolean} accountInfo.receives_promotional_material Specifies
+   * whether or not the account has opted in to receiving promotional material.
+   * @param {string} accountInfo.facebook_url Data for connecting to facebook.
+   * @param {string} accountInfo.googleplus_url Data for connecting to G+.
+   * @param {string} accountInfo.twitter_url Data for connecting to twitter.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  createAccount: function(accountInfo, callback) {
+    var username = accountInfo.username;
+    var password = accountInfo.password;
+    var query;
+    if (username.length === 0) {
+      query = Promise.reject("No username");
+    } else if (password.length === 0) {
+      query = Promise.reject("No password");
+    } else if (password.length &lt; MIN_PASSWORD_LENGTH) {
+      query = Promise.reject("Password too short");
+    } else if (accountInfo.first_name.length === 0) {
+      query = Promise.reject("First name too short");
+    } else {
+      query = scryptHelper.hashPassword(password).catch(function(error) {
+        throw error;
+      });
+    }
+    var hashedPassword;
+    query.then(function(hashedPwdResult) {
+      hashedPassword = hashedPwdResult;
+      return db.none("SELECT * FROM customer_account WHERE username = $1",
+      [username]).catch(function(error) {
+        throw "Non-unique username";
+      });
+    }).then(function(result) {
+      return db.tx(function(t) {
+        var q1 = this.none("LOCK TABLE customer_account IN ROW EXCLUSIVE MODE");
+        var q2 = this.none("LOCK TABLE customer_profile IN ROW EXCLUSIVE MODE");
+        var q3 = this.none("LOCK TABLE customer_credit IN ROW EXCLUSIVE MODE");
+        var q4 = this.one("INSERT INTO " +
+          "customer_account(username, password_hash) VALUES($1, $2) " +
+          "RETURNING username",
+          [username, hashedPassword.toString("base64")]);
+        var q5 = this.one(
+          "WITH profile_info AS ( " +
+            "INSERT INTO customer_profile(username, first_name, last_name, " +
+              "profile_description, email, timezone, " +
+              "receives_promotional_material, googleplus_url, twitter_url, " +
+              "facebook_url) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) " +
+            "RETURNING msg_user_id, customer_id, username " +
+          "), " +
+          "credit_info AS ( " +
+            "INSERT INTO customer_credit (customer_id) VALUES ( " +
+              "(SELECT customer_id FROM profile_info) " +
+            ") " +
+          ") " +
+          "SELECT * FROM profile_info",
+        [username, accountInfo.first_name, accountInfo.last_name,
+          accountInfo.profile_description, accountInfo.email,
+          accountInfo.timezone, accountInfo.receives_promotional_material,
+          accountInfo.googleplus_url, accountInfo.twitter_url,
+          accountInfo.facebook_url]);
+        return this.batch([q1, q2, q3, q4, q5]);
+      }).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result[4]
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + JSON.stringify(error),
+        "result": null
+      });
+      console.log("Create account failed: " + JSON.stringify(error));
+    });
+  },
+  /**
+   * This function retrieves the ID of the account with the specified username
+   * and password passed into the function. The "status" field of the result
+   * object will be set to "SUCCESS" if the function succeeds, otherwise it
+   * will be set the "FAIL: " followed by an error message. The "result" field
+   * will be an object with the fields username, password_hash, customer_id,
+   * and msg_user_id. The msg_user_id field is used for messaging system
+   * management.
+   * @param {string} username Username of the account to access.
+   * @param {string} password Password of the account to access.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  accessAccount: function(username, password, callback) {
+    var tableResult = null;
+    scryptHelper.verifyPwdFromQuery(db.one("SELECT username, password_hash, " +
+      "customer_id, msg_user_id, ban_date + ban AS ban_target_date " +
+      "FROM customer_account NATURAL JOIN customer_profile " +
+    "WHERE username = $1",
+    [username]), password).catch(function(error) {
+      throw error;
+    }).then(function(tableSelectResult) {
+      tableResult = tableSelectResult;
+      return scryptHelper.updatePwdHashQuery(db, "customer_account",
+        username, password, tableSelectResult.password_hash)
+      .catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": tableResult
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Access account failed: " + error);
+    });
+  },
+  /**
+   * This function updates account password or ban status information in the
+   * database. The "status" field of the result object will be set to "SUCCESS"
+   * if the function succeeds, otherwise it will be set the "FAIL: " followed
+   * by an error message. The "result" field is always set to null. Note
+   * that this function cannot modify the username of an account.
+   * @summary Modifies account data in db given username and password.
+   * @param {string} username The username of the account to modify.
+   * @param {string} password The password of the account to modify.
+   * @param {string} fieldType The field that the function will modify. Valid
+   * values are "password" and "ban".
+   * @param {string} newField The new value of the field that will be modified.
+   * For bans, valid values of newField are restricted to: "none", "oneweek",
+   * "twoweeks", "onemonth", "halfyear", "year", and "perma".
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  modifyAccount: function(username, token, fieldType, newField, callback) {
+    // stores the promise of the function
+    var query;
+    // check if field is valid
+    if (fieldType !== "password" &amp;&amp; fieldType !== "ban") {
+      query = Promise.reject("Field type invalid");
+    } else if (fieldType === "password") {
+      // check password field
+      if (newField.length &lt; MIN_PASSWORD_LENGTH) {
+        query = Promise.reject("Password Too Short");
+      } else {
+        query = verifyAccountToken(username, token).catch(function(error) {
+          throw error;
+        }).then(function(result) {
+          return scryptHelper.hashPassword(newField).catch(function(error) {
+            throw error;
+          });
+        }).then(function(hashedPwdResult) {
+          return db.one("UPDATE customer_account SET password_hash = $1 " +
+            "WHERE username = $2 RETURNING username",
+          [hashedPwdResult.toString("base64"), username])
+          .catch(function(error) {
+            throw error;
+          });
+        });
+      }
+    } else if (fieldType === "ban") {
+      // validate ban field (now a duration field)
+      query = db.one("SELECT $1::interval", newField).catch(function(error) {
+        throw "Illegal ban interval";
+      }).then(function(result) {
+        return verifyAccountToken(username, token);
+      }).then(function(result) {
+        return db.one("UPDATE customer_profile SET ban = $1::interval " +
+          "WHERE username = $2 RETURNING username",
+        [newField, username])
+        .catch(function(error) {
+          throw error;
+        });
+      });
+    }
+    query.then(function(result) {
+      return invalidateAccountToken(username);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Modify account failed: " + error);
+    });
+  },
+  /**
+   * This function deletes an account with the username and password specified
+   * from the database. The "status" field of the result object will be set to
+   * "SUCCESS" if the function succeeds, otherwise it will be set to "FAIL: "
+   * followed by an error message. The "result" field is always set to null.
+   * @summary Deletes an account given username and password.
+   * @param {string} username The username for the account to be created
+   * @param {string} password The password for the account to be created
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  deleteAccount: function(username, token, callback) {
+    verifyAccountToken(username, token).catch(function(error) {
+      throw error;
+    }).then(function(result) {
+      return db.none("DELETE FROM customer_account WHERE username = $1",
+      username).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Delete account failed: " + error);
+    });
+  },
+  // testing only
+  deleteAccountAndProfile: function(username, token, callback) {
+    verifyAccountToken(username, token).catch(function(error) {
+      throw error;
+    }).then(function(result) {
+      return db.one("DELETE FROM customer_profile WHERE username = $1 " +
+        "RETURNING username",
+      username).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      return db.one("DELETE FROM customer_account WHERE username = $1 " +
+        "RETURNING username",
+      username).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Delete account &amp; profile failed: " + error);
+    });
+  },
+  /**
+   * Selects all customer accounts in the database and converts all the rows
+   * into objects. The "status" field of the result object will be set to
+   * "SUCCESS" if the function succeeds, and the "result" will contain an array
+   * consisting of all the objects the function selected. Otherwise, the
+   * "status" field will be set to "FAIL: " followed by an error message,
+   * and the result will be set to null.
+   * @summary Selects all customer accounts in db and returns them.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  selectAllAccounts: function(callback) {
+    db.any("SELECT username, customer_id, msg_user_id FROM customer_profile " +
+    "WHERE username IS NOT NULL").then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }, function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Select all accounts failed: " + error);
+    });
+  },
+  /**
+   * This function queries the database for a profile with the given username,
+   * and returns all the data of the profile as an object. The "status" field
+   * of the result object will be set to "SUCCESS" if the function succeeds,
+   * and the result field will be set to the object containing all the data
+   * of the profile. Otherwise, the "status" field will be set to "FAIL: "
+   * followed by an appropriate error message, and the "result" field will
+   * be set to null.
+   * @summary Acceess profile data from db given username.
+   * @param {string} username The username of the profile to access.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  accessProfile: function(username, callback) {
+    db.one("SELECT * FROM customer_profile WHERE username = $1",
+    [username]).catch(function(error) {
+      callback({
+        "status": "FAIL: Profile does not exist",
+        "result": null
+      });
+      console.log("Access profile failed: Profile does not exist");
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    });
+  },
+  /**
+   * This function updates a profile with the the newData object by updating
+   * the database with all the fields in newData. This function does not
+   * update the username of a profile. The "status" field of the result object
+   * will be set to "SUCCESS" if the function succeeds, otherwise it will be
+   * set to "FAIL: " followed by an error message. The "result" field is always
+   * set to null.
+   * @summary Updates profile info in db given object containing profile data.
+   * @param {Object} newData An object consisting of all profile data to update
+   * the database with.
+   * @param {string} newData.username The username of the profile to modify.
+   * Note that this field will NOT be updated.
+   * @param {string} newData.first_name The first name of the profile.
+   * @param {string} newData.last_name The last name of the profile.
+   * @param {string} newData.profile_description The description of the profile.
+   * @param {string} newData.timezone The timezone of the profile.
+   * @param {string} newData.email The email of the profile.
+   * @param {boolean} newData.receives_promotional_material Specifies whether or
+   * not the profile opted to receive promotional material.
+   * @param {string} newData.facebook_url Facebook url of the profile.
+   * @param {string} newData.googleplus_url Google+ url of the profile.
+   * @param {string} newData.twitter_url Twitter url of the profile.
+   * @param {responseCallback} callback - The callback that handles the response
+   */
+  modifyProfile: function(newData, callback) {
+    db.one("SELECT * FROM customer_profile WHERE username = $1",
+    [newData.username]).catch(function(error) {
+      throw "Authentication failed";
+    }).then(function(result) {
+      return db.none("UPDATE customer_profile SET first_name = $2, " +
+        "last_name = $3, profile_description = $4, timezone = $5, " +
+        "email = $6, receives_promotional_material = $7, " +
+        "facebook_url = $8, googleplus_url = $9, twitter_url = $10 " +
+        "WHERE username = $1",
+      [newData.username, newData.first_name, newData.last_name,
+        newData.profile_description, newData.timezone,
+        newData.email, newData.receives_promotional_material,
+        newData.facebook_url, newData.googleplus_url,
+        newData.twitter_url])
+      .catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Modify profile failed: " + error);
+    });
+  },
+
+  genAccountToken: function(username, email, minWaitTime, callback) {
+    var getDBQuery = function(username, email) {
+      if (username !== undefined) {
+        // if there is no email, cannot recover account
+        return db.one("SELECT username, email, token_gen_date " +
+          "FROM customer_profile WHERE username = $1",
+        username).catch(function(error) {
+          throw error;
+        });
+      } else if (email !== undefined) {
+        return db.one("SELECT username, email, token_gen_date " +
+          "FROM customer_profile WHERE email = $1 AND username IS NOT NULL",
+        email).catch(function(error) {
+          throw error;
+        });
+      } else {
+        return Promise.reject("cannot find account without any information");
+      }
+    };
+    getDBQuery(username, email).then(function(result) {
+      if (result.token_gen_date &amp;&amp;
+          Date.now() - result.token_gen_date.getTime() &lt; minWaitTime) {
+        throw "minimum wait time not passed";
+      }
+      return db.one("UPDATE customer_profile SET token = $1, " +
+        "token_gen_date = now() WHERE username = $2 " +
+        "RETURNING username, concat_ws(' ', first_name, last_name) AS name, " +
+        "email, token, 'customer' AS account_type",
+      [random.genRandomString(), result.username]).catch(function(error) {
+        throw error;
+      });
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Generate account token failed: " + error);
+    });
+  },
+  // resets token generation time manually in case a function fails after
+  // token is generated but before token is used
+  resetTokenGenTime: function(username, callback) {
+    db.one("UPDATE customer_profile SET token_gen_date = null " +
+      "WHERE username = $1 RETURNING username", username)
+    .catch(function(error) {
+        throw error;
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": null
+      });
+    }).catch(function(error) {
+      callback({
+        "status": "FAIL: " + error
+      });
+      console.log("Reset token generation time fail: " + error);
+    });
+  }
+};
+
+// verifies token matches
+function verifyAccountToken(username, token) {
+  return new Promise(function(resolve, reject) {
+    db.one("SELECT token_gen_date FROM customer_profile " +
+           "WHERE username = $1 AND token = $2", [username, token])
+    .catch(function(error) {
+      throw "verify token failed: username or token invalid";
+    }).then(function(result) {
+      if (!result.token_gen_date) {
+        throw "verify token failed: token invalid";
+      } else if (Date.now() - result.token_gen_date.getTime() >
+          ACCOUNT_TOKEN_EXPIRY_IN_MS) {
+        throw "verify token failed: token expired";
+      } else {
+        resolve(true);
+      }
+    }).catch(function(error) {
+      reject(error);
+    });
+  });
+}
+
+// resets the token so it cannot be used again
+function invalidateAccountToken(username) {
+  return new Promise(function(resolve, reject) {
+    db.one("UPDATE customer_profile SET token = null, token_gen_date = null " +
+           "WHERE username = $1 RETURNING username", username)
+    .catch(function(error) {
+      throw "no such username";
+    }).then(function(result) {
+      resolve(true);
+    }).catch(function(error) {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * The response callback called when a customer account model function
+ * sends data back to the studio package controller.
+ * @summary Response callback to customer account controller.
+ * @callback responseCallback
+ * @param {Object} result - The data that the customer account
+ * controller receives
+ * @param {string} result.status - The status of the function. It is set to
+ * "SUCCESS" if function executed successfully, otherwise it is set to "FAIL: "
+ * followed by the error message.
+ * @param {Object} result.result - Returns the expected result of the
+ * function. Refer to the function documentation to see the possible
+ * values for this field.
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

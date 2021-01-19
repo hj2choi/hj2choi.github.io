@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/messagesRoutes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/messagesRoutes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module messagesRoutes
+ */
+var messagesController =
+  require("../controllers/messagesController.js");
+var studioAccountController =
+  require("../controllers/studioAccountController.js");
+var customerAccountController =
+  require("../controllers/customerAccountController.js");
+
+var messageRequests = new Map();
+
+/* jshint esnext: true */
+
+/**
+ * @summary The number of millseconds in 1 day, used to advance the day by 1.
+ * @constant
+ * @default
+ */
+const MILLISECONDS_IN_1_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * @summary The default request timeout, currently set to 6 seconds.
+ * @constant
+ * @default
+ */
+const DEFAULT_REQUEST_TIMEOUT = 6 * 1000;
+
+/**
+* @todo Need to fix the senderCBox grab in .ejs file
+*/
+module.exports = {
+  init : function(app) {
+    app.get("/messagesView", function(req, res) {
+      // get all messages
+      var getAccountList = function(type, callback) {
+        var accountList;
+        if (type === "customer") {
+          customerAccountController.selectAll(function(data) {
+            callback({
+              "type": type,
+              "accountList": data.result
+            });
+          });
+        } else if (type == "studio") {
+          studioAccountController.selectAll(function(data) {
+            callback({
+              "type": type,
+              "accountList": data.result
+            });
+          });
+        } else {
+          // stubbed for admin account type
+          callback(null);
+        }
+      };
+      var messageUserId = req.session.msgUserId;
+      messagesController.readMessages({
+        "session": req.session,
+        "body": {
+          "startTime": new Date(Date.now() - MILLISECONDS_IN_1_DAY).toString(),
+          "endTime": new Date().toString()
+        }
+      }, function(data) {
+        var messages = data.result;
+        // get account list
+        var accountType;
+        if (req.session.acct === "studio") {
+          accountType = "customer";
+        } else if (req.session.acct === "customer") {
+          accountType = "studio";
+        }
+        getAccountList(accountType, function(result) {
+          res.render("pages/messagesList", {
+            "messages": messages,
+            "accountLists": [result],
+            "sess": req.session
+          });
+        });
+      });
+    });
+
+    app.post("/sendMessage", function(req, res){
+      messagesController.sendMessage(req, function(data) {
+        res.send(data);
+      });
+    });
+
+    app.post("/requestAllMessages", function(req, res) {
+      messagesController.readMessages(req, function(data) {
+        res.send(data);
+      })
+    });
+
+    app.post("/requestNextMessage", function(req, res) {
+      // push the sending handler to the map
+      // so when a message arrives,
+      // it can be handled
+      var noMessageResponse = {
+        "status": "NO MESSAGE",
+        "result": null
+      };
+      var sess = req.session;
+      var timeoutObject;
+      // send and delete request after amount of time
+      timeoutObject = setTimeout(function() {
+        var msgRequest = messageRequests.get(sess.msgUserId);
+        if (msgRequest !== undefined) {
+          msgRequest.handler(noMessageResponse);
+        }
+        console.log(sess.acct + " message request from " + sess.msgUserId
+          + " timed out.");
+        clearTimeout(msgRequest.timeout);
+        messageRequests.delete(sess.msgUserId);
+      }, DEFAULT_REQUEST_TIMEOUT);
+      // add message request to queue
+      if (messageRequests.get(sess.msgUserId) !== undefined) {
+        clearTimeout(messageRequests.get(sess.msgUserId.timeout));
+      }
+      messageRequests.set(sess.msgUserId, {
+        timeout: timeoutObject,
+        handler: function(data) {
+          res.send(data)
+        }
+      });
+      console.log("Queued " + sess.acct + " message request from: "
+        + sess.msgUserId);
+    });
+  },
+
+  handleMessageNotif: function(payload) {
+    var messageRequest = messageRequests.get(payload.recipient);
+    if (messageRequest !== undefined) {
+      clearTimeout(messageRequest.timeout);
+      messagesController.getMessageByID({
+        "body": {
+          "messageId": payload.message_id
+        }
+      }, function(result) {
+        messageRequest.handler(result);
+      });
+    }
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

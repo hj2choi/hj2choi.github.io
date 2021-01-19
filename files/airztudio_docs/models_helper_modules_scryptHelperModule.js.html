@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/helper_modules/scryptHelperModule.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/helper_modules/scryptHelperModule.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @summary Scrypt Helper Module
+ * @description Wraps common scrypt and database patterns into promises for
+ * convenience.
+ * @module scryptHelperModule
+ * @requires scrypt
+ * @see messagesController
+ * @author hautonjt
+ */
+
+var scrypt = require("scrypt");
+var scryptParams =
+  scrypt.paramsSync(parseFloat(process.env.SCRYPT_MAX_TIME),
+                    parseInt(process.env.SCRYPT_MAX_MEM),
+                    parseFloat(process.env.SCRYPT_MAX_MEMFRAC));
+
+/**
+ * Determines if there are differences in scrypt params between the hash string
+ * and the environment
+ * @summary Checks for scrypt param changes
+ * @param {string} hashString The input hash string to extract
+ * embedded scrypt params
+ * @return {boolean} Value indicating whether there
+ * are differences or not
+ */
+var checkScryptParamChanges = function(hashString) {
+  return !(parseInt(hashString.substr(12, 4), 16) === scryptParams.N &amp;&amp;
+           parseInt(hashString.substr(16, 8), 16) === scryptParams.r &amp;&amp;
+           parseInt(hashString.substr(24, 8), 16) === scryptParams.p);
+};
+
+module.exports = {
+  /**
+   * This function will verify a password hash from a SELECT query with
+   * the password passed in as a parameter using scrypt.
+   * @summary Verifies password hash from query promise.
+   * @param {Promise} queryPromise This is a promise whose onFulfilled handle
+   * will return an object with a passwordHash field.
+   * @param {string} password The password to check the passwordHash against.
+   * @return {Promise} The promise object will be resolved if the password is
+   * successful, and the result will be the result of the SELECT query.
+   * If either the SELECT query fails or the password does not match the hash,
+   * the promise will be rejected with an error message.
+   */
+  verifyPwdFromQuery: function(queryPromise, password) {
+    return new Promise(function (resolve, reject) {
+      queryPromise.then(function(result) {
+        if (result.ban_target_date !== undefined &amp;&amp;
+            result.ban_target_date !== null &amp;&amp;
+            result.ban_target_date.getTime() > Date.now()) {
+          reject("Account is banned until: " +
+            result.ban_target_date.toString());
+        } else {
+          scrypt.verifyKdf(new Buffer(result.password_hash, "base64"),
+          new Buffer(password, "ascii")).then(function(success) {
+            if (success) {
+              resolve(result);
+            } else {
+              reject("Passwords do not match");
+            }
+          }, function(error) {
+            reject(error);
+          });
+        }
+      }, function(error) {
+        reject(error);
+      });
+    });
+  },
+  /**
+   * This function rehashes the current password and updates the password hash
+   * stored in the database with it. This is useful if the scrypt parameters
+   * in the website change.
+   * @summary Updates password_hash in database.
+   * @param {Object} db The database object from pg-promise.
+   * @param {string} table The table to update the password hash for, eg.
+   * "customer_account".
+   * @param {string} username The username of the account whose password should
+   * be updated.
+   * @param {string} password The current password of the account.
+   * @param {string} passwordHash The current password hash of the account.
+   * @return {Promise} The promise object will be resolved with "SUCCESS"
+   * if the password hash does not require a re-hash, or if the password hash
+   * has been successfully updated. The object will be rejected with an
+   * error message if the hash function fails or the password hash cannot be
+   * updated in the database for some reason.
+   */
+  updatePwdHashQuery: function(db, table, username, password, passwordHash) {
+    return new Promise(function (resolve, reject) {
+      if (checkScryptParamChanges(new Buffer(passwordHash,
+      "base64").toString("hex"))) {
+        scrypt.kdf(new Buffer(password, "ascii"), scryptParams)
+        .then(function(hashedPwdResult) {
+          db.query("UPDATE $1^ SET password_hash = $2 " +
+          "WHERE username = $3 AND password_hash = $4",
+          [table, hashedPwdResult.toString("base64"), username,
+            passwordHash])
+          .then(function(success) {
+            resolve("SUCCESS");
+          }, function(error) {
+            reject(error);
+          });
+        }, function(error) {
+          reject(error);
+        });
+      } else {
+        resolve("SUCCESS");
+      }
+    });
+  },
+  /**
+   * This function wraps scrypt.kdf in a Promise object to encapsulate
+   * the usage of scrypt functions from the account models.
+   * @summary Wraps scrypt hash function in a promise object.
+   * @param {string} password The password to hash.
+   * @return {Promise} The promise object will be resolved with the hash of
+   * the password if the password is hashed successfully, and
+   * rejected with an error if it is not.
+   */
+  hashPassword: function(password) {
+    return new Promise(function(resolve, reject) {
+      scrypt.kdf(new Buffer(password, "ascii"), scryptParams)
+      .then(function(hashedPwdResult) {
+        resolve(hashedPwdResult);
+      }, function(error) {
+        reject(error);
+      });
+    });
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

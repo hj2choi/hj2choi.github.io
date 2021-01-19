@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @description The index is the entry point of the application.
+ * @module index
+ */
+var express = require("express");
+var bodyParser = require("body-parser");
+var session = require("express-session");
+var pg = require("pg");
+var cloudinary = require('cloudinary');
+var pgSession = require("connect-pg-simple")(session);
+var app = express();
+
+cloudinary.config({
+  cloud_name: 'hsqhugayz',
+  api_key: '877877653447631',
+  api_secret: '7oedQ2XXhySoHOlBQ1CFavk2PPo' 
+});
+
+var customerAccountController =
+  require("./controllers/customerAccountController.js");
+var studioAccountController =
+  require("./controllers/studioAccountController.js");
+
+var passwordRecoveryRoutes = require("./routes/passwordRecoveryRoutes.js");
+var profileRoutes = require("./routes/profileRoutes.js");
+var testRoutes = require("./routes/testRoutes.js");
+var messagesRoutes = require("./routes/messagesRoutes.js");
+var signUpRoutes = require("./routes/signUpRoutes.js");
+var packageRoutes = require("./routes/packageRoutes.js");
+var paymentRoutes = require("./routes/paymentRoutes.js");
+
+/* jshint esnext: true */
+
+/**
+ * @summary The number of millseconds in 30 days, used as the default age of a
+ * cookie not logged in.
+ * @constant
+ * @default
+ */
+const COOKIE_AGE_NOT_LOGGED_IN = 24 * 60 * 60 * 1000;
+
+/**
+ * @summary The number of millseconds in 30 days, used as the default age
+ * of a cookie once logged in.
+ * @constant
+ * @default
+ */
+const COOKIE_AGE_ONCE_LOGGED_IN = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * @summary The default port that node will run on.
+ * @constant
+ * @default
+ */
+const DEFAULT_FALLBACK_PORT = 5000;
+
+app.use(express.static(__dirname + "/public"));
+
+// extended = true to support nested JSON objects in requests
+// this is utilized extensively for package requests
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  store: new pgSession({
+    pg: pg,
+    conString: process.env.DATABASE_URL,
+    tableName: "session"
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    maxAge: COOKIE_AGE_NOT_LOGGED_IN
+  }
+}));
+
+app.set("port", (process.env.PORT || DEFAULT_FALLBACK_PORT));
+app.set("views", __dirname + "/views");
+app.set("view engine", "ejs");
+
+profileRoutes.init(app);
+testRoutes.init(app);
+messagesRoutes.init(app);
+signUpRoutes.init(app);
+packageRoutes.init(app);
+passwordRecoveryRoutes.init(app);
+paymentRoutes.init(app);
+
+/*
+ * This is used for handling database notifications. Particularly,
+ * it will handle message_notifications, which are fired whenever
+ * a message is sent. More notification types can be added as needed.
+ * TODO: Add actual handling of notifications rather than printing to console.
+ * The module pg is required for this particular function as it is the only
+ * module that supports notification handling.
+ */
+pg.connect(process.env.DATABASE_URL, function(error, client) {
+  if(error) {
+    // There is a problem with connecting to the database
+    console.log(error);
+  } else {
+    // this method will fire when a message is received
+    client.on("notification", function(notif) {
+      /*
+       * this is the notification object containing the notification
+       * name and payload. The payload of a message_notification is
+       * the type of message (table message was inserted to),
+       * id of the message, and the intended recipient.
+       * Hence, the recipient ID can be checked in the pending requests,
+       * and when a matching recipient has a pending query,
+       * it will send a query for the newest message and send it over.
+       */
+      if (notif.channel === "message_notifications") {
+        messagesRoutes.handleMessageNotif(JSON.parse(notif.payload));
+      }
+    });
+    var query = client.query("listen message_notifications");
+  }
+});
+
+app.get("/", function(req, res) {
+  sess = req.session;
+  res.render("pages/index", { "sess": sess });
+});
+
+app.get("/db", function(req, res) {
+  sess = req.session;
+  if(sess.acct === "studio") {
+    studioAccountController.selectAll(function(data) {
+      res.render("pages/accountsList", { "rows": data.result, "sess": sess });
+    });
+  }
+  else {
+    customerAccountController.selectAll(function(data) {
+      res.render("pages/accountsList", { "rows": data.result, "sess": sess });
+    });
+  }
+});
+
+app.get("/gettingStarted", function(req, res) {
+  sess = req.session;
+  if(!(sess.acct === "studio" || sess.acct === "customer")) {
+    res.render("pages/gettingStarted", { "sess": sess });
+  }
+  else {
+    res.redirect("/");
+  }
+});
+
+/**
+* @todo Use the sess.messages variable to equal "active" if there are any
+* messages
+*/
+app.post("/logIn", function(req, res) {
+  sess = req.session;
+  if(req.body.type === "studio") {
+    studioAccountController.getAccount(req, function(data) {
+      if(data.status === "SUCCESS") {
+        sess.loggedIn = true;
+        sess.acct = "studio";
+        sess.username = data.result.username;
+        sess.ID = data.result.studio_id;
+        sess.msgUserId = data.result.msg_user_id;
+        sess.messages = "active";
+        // only need to save store sessions for a long time if logged in
+        req.session.cookie.maxAge = COOKIE_AGE_ONCE_LOGGED_IN;
+        req.session.save(function(error) {
+          if (error !== null &amp;&amp; error !== undefined) {
+            console.log("ERROR: cannot save session " + error);
+          }
+          res.send(data);
+        });
+      } else {
+        res.send(data);
+      }
+    });
+  } else {
+    customerAccountController.getAccount(req, function(data) {
+      if(data.status === "SUCCESS") {
+        sess = req.session;
+        sess.loggedIn = true;
+        sess.username = data.result.username;
+        sess.ID = data.result.customer_id;
+        sess.msgUserId = data.result.msg_user_id;
+        sess.acct = "customer";
+        // only need to save store sessions for a long time if logged in
+        req.session.cookie.maxAge = COOKIE_AGE_ONCE_LOGGED_IN;
+        req.session.save(function(error) {
+          if (error !== null &amp;&amp; error !== undefined) {
+            console.log("ERROR: cannot save session " + error);
+          }
+          res.send(data);
+        });
+      } else {
+        res.send(data);
+      }
+    });
+  }
+});
+
+app.post("/logout", function(req, res){
+  req.session.destroy(function(error) {
+    if (error !== null &amp;&amp; error !== undefined) {
+      console.log("ERROR: Cannot destroy session due to " + error);
+    } else {
+      console.log("Session destroyed");
+    }
+  });
+  res.send("DONE");
+});
+
+app.use(function(req, res, next){
+  res.status(404);
+  res.format({
+    "html": function() {
+      res.render("pages/404", { url: req.url });
+    },
+    "json": function() {
+      res.json({ error: "Not found" });
+    },
+    "text":  function() {
+      res.send("Not found");
+    },
+    "default": function() {
+      res.status(406).send("Not acceptable");
+    }
+  });
+});
+
+app.listen(app.get("port"), function() {
+  console.log("Node app is running on port", app.get("port"));
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

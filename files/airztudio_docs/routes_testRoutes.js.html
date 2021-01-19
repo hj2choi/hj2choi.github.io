@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/testRoutes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/testRoutes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module testRoutes
+ */
+var customerAccountController =
+  require("../controllers/customerAccountController.js");
+var studioAccountController =
+  require("../controllers/studioAccountController.js");
+var studioPackagesController =
+  require("../controllers/studioPackagesController.js");
+
+module.exports = {
+  /**
+   * This function initializes all the routes used to produce and run all the
+   * test cases we have.
+   * @param {Object} app This is the express routing object
+   * @summary Intializes all the routes
+   */
+  init : function(app) {
+    /**
+     * This route will return the QTest page, showing the results of all the
+     * executed tests, rendered using the QUnit view.
+     * @name QTest route
+     */
+    app.get("/Qtest", function(req, res) {
+      sess = req.session;
+      res.render("tests/QUnit", {"sess":sess});
+    });
+    /**
+     * This route will receive all the customer account tests, passing them to
+     * the customerAccountController test method.
+     * @todo Should change customerAccountController to take in a handler, not
+     * instantiate the handler inside the controller, that is poor encapsulation.
+     * @name Customer Account Testing Route
+     */
+    app.post("/customerAccountTest", function(req, res) {
+      customerAccountController.test(req, res, function(data) {
+        res.send(data);
+      });
+    });
+    /**
+    * This route will be used to send customer delete tests, possibly could be
+    * shifted later to be used in production code for deletion purposes.
+    * @name Customer Deletion Testing Route
+    */
+    app.post("/customerDelete", function(req,res) {
+      customerAccountController.genAccountToken(req,function(data){
+        if(data.status == "SUCCESS") {
+          req.body.token = data.result.token;
+          customerAccountController.completeDelete(req,function(data){
+            res.send(data);
+          });
+        }
+        else {
+          res.send(data);
+        }
+      });
+    });
+    /**
+    * This route will be used to send studio delete tests, possibly could be shifted
+    * later to be used in production code for deletion purposes.
+    * @name Studio Deletion Testing Route
+    */
+    app.post("/studioDelete", function(req,res) {
+      studioAccountController.genAccountToken(req,function(data){
+        if(data.status == "SUCCESS") {
+          req.body.token = data.result.token;
+          studioAccountController.completeDelete(req,function(data){
+            res.send(data);
+          });
+        }
+        else {
+          res.send(data);
+        }
+      })
+    })
+    /**
+     * This route will receive all the studio account tests, passing them to
+     * the studioAccountController test method.
+     * @name Studio Account Testing Route
+     */
+    app.post("/studioAccountTest", function(req, res){
+      studioAccountController.test(req, res, function(data) {
+        res.send(data);
+      });
+    });
+    /**
+     * This route will receive all the studio package tests, passing them to
+     * the studioPackagesController test method.
+     * @name Studio Packages Testing Route
+     */
+    app.post("/studioPackagesTest", function(req, res) {
+      studioPackagesController.test(req, res, function(data) {
+        res.send(data);
+      });
+    });
+
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

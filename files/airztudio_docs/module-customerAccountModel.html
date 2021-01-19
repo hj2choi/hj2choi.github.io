@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: customerAccountModel</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: customerAccountModel</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>The customer account model handles retrieving, storing,
+deleting, or modifying customer account related data in the database.</p></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>customerAccountController</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:pg-promise</li>
+        
+            <li><a href="module-scryptHelperModule.html">module:scryptHelperModule</a></li>
+        
+            <li><a href="module-randomModule.html">module:randomModule</a></li>
+        </ul>
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="~ACCOUNT_TOKEN_EXPIRY_IN_MS"><span class="type-signature">(inner, constant) </span>ACCOUNT_TOKEN_EXPIRY_IN_MS<span class="type-signature"></span></h4>
+
+
+<p class="summary">The lifetime of a generated account token.</p>
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~MIN_PASSWORD_LENGTH"><span class="type-signature">(inner, constant) </span>MIN_PASSWORD_LENGTH<span class="type-signature"></span></h4>
+
+
+<p class="summary">The minimum password length allowed for an account.</p>
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy">
+            <li>8</li>
+        </ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line24">line 24</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".accessAccount"><span class="type-signature">(static) </span>accessAccount<span class="signature">(username, password, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary"><p>This function retrieves the ID of the account with the specified username
+and password passed into the function.</p></p>
+    
+
+
+
+<div class="description">
+    <p>This function retrieves the ID of the account with the specified username
+and password passed into the function. The &quot;status&quot; field of the result
+object will be set to &quot;SUCCESS&quot; if the function succeeds, otherwise it
+will be set the &quot;FAIL: &quot; followed by an error message. The &quot;result&quot; field
+will be an object with the fields username, password_hash, customer_id,
+and msg_user_id. The msg_user_id field is used for messaging system
+management.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Username of the account to access.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Password of the account to access.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line144">line 144</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".accessProfile"><span class="type-signature">(static) </span>accessProfile<span class="signature">(username, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Acceess profile data from db given username.</p>
+    
+
+
+
+<div class="description">
+    <p>This function queries the database for a profile with the given username,
+and returns all the data of the profile as an object. The &quot;status&quot; field
+of the result object will be set to &quot;SUCCESS&quot; if the function succeeds,
+and the result field will be set to the object containing all the data
+of the profile. Otherwise, the &quot;status&quot; field will be set to &quot;FAIL: &quot;
+followed by an appropriate error message, and the &quot;result&quot; field will
+be set to null.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username of the profile to access.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line341">line 341</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".createAccount"><span class="type-signature">(static) </span>createAccount<span class="signature">(accountInfo, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Creates an account and profile in the db given username andpassword.</p>
+    
+
+
+
+<div class="description">
+    <p>This function creates an account and profile with the username, password,
+and profile data specified in the accountInfo object and inserts it into
+the database. The &quot;status&quot; field of the result object will be set to
+&quot;SUCCESS&quot; if the function succeeds, therwise it will be set the &quot;FAIL: &quot;
+followed by an error message. The &quot;result&quot; field is always set to null.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>accountInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The object that holds all the account
+and profile data to be inserted to the database.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username for the account to
+be created.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The password for the account to
+be created.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>first_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The first name to be stored in
+the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>last_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The last name to be stored in
+the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>profile_description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A description of the
+profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The email of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timezone</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A string representing the full name
+of a timezone to be recorded in the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>receives_promotional_material</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Specifies
+whether or not the account has opted in to receiving promotional material.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>facebook_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Data for connecting to facebook.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>googleplus_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Data for connecting to G+.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>twitter_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Data for connecting to twitter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line63">line 63</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".deleteAccount"><span class="type-signature">(static) </span>deleteAccount<span class="signature">(username, password, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Deletes an account given username and password.</p>
+    
+
+
+
+<div class="description">
+    <p>This function deletes an account with the username and password specified
+from the database. The &quot;status&quot; field of the result object will be set to
+&quot;SUCCESS&quot; if the function succeeds, otherwise it will be set to &quot;FAIL: &quot;
+followed by an error message. The &quot;result&quot; field is always set to null.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username for the account to be created</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The password for the account to be created</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line254">line 254</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".modifyAccount"><span class="type-signature">(static) </span>modifyAccount<span class="signature">(username, password, fieldType, newField, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Modifies account data in db given username and password.</p>
+    
+
+
+
+<div class="description">
+    <p>This function updates account password or ban status information in the
+database. The &quot;status&quot; field of the result object will be set to &quot;SUCCESS&quot;
+if the function succeeds, otherwise it will be set the &quot;FAIL: &quot; followed
+by an error message. The &quot;result&quot; field is always set to null. Note
+that this function cannot modify the username of an account.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username of the account to modify.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The password of the account to modify.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The field that the function will modify. Valid
+values are &quot;password&quot; and &quot;ban&quot;.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>newField</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The new value of the field that will be modified.
+For bans, valid values of newField are restricted to: &quot;none&quot;, &quot;oneweek&quot;,
+&quot;twoweeks&quot;, &quot;onemonth&quot;, &quot;halfyear&quot;, &quot;year&quot;, and &quot;perma&quot;.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line188">line 188</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".modifyProfile"><span class="type-signature">(static) </span>modifyProfile<span class="signature">(newData, callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Updates profile info in db given object containing profile data.</p>
+    
+
+
+
+<div class="description">
+    <p>This function updates a profile with the the newData object by updating
+the database with all the fields in newData. This function does not
+update the username of a profile. The &quot;status&quot; field of the result object
+will be set to &quot;SUCCESS&quot; if the function succeeds, otherwise it will be
+set to &quot;FAIL: &quot; followed by an error message. The &quot;result&quot; field is always
+set to null.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>newData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>An object consisting of all profile data to update
+the database with.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The username of the profile to modify.
+Note that this field will NOT be updated.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>first_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The first name of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>last_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The last name of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>profile_description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The description of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timezone</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The timezone of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The email of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>receives_promotional_material</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Specifies whether or
+not the profile opted to receive promotional material.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>facebook_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Facebook url of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>googleplus_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Google+ url of the profile.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>twitter_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Twitter url of the profile.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line380">line 380</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".selectAllAccounts"><span class="type-signature">(static) </span>selectAllAccounts<span class="signature">(callback)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Selects all customer accounts in db and returns them.</p>
+    
+
+
+
+<div class="description">
+    <p>Selects all customer accounts in the database and converts all the rows
+into objects. The &quot;status&quot; field of the result object will be set to
+&quot;SUCCESS&quot; if the function succeeds, and the &quot;result&quot; will contain an array
+consisting of all the objects the function selected. Otherwise, the
+&quot;status&quot; field will be set to &quot;FAIL: &quot; followed by an error message,
+and the result will be set to null.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">responseCallback</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The callback that handles the response</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line314">line 314</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+
+    
+
+    <h4 class="name" id="~responseCallback"><span class="type-signature"></span>responseCallback<span class="signature">(result)</span><span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Response callback to customer account controller.</p>
+    
+
+
+
+<div class="description">
+    <p>The response callback called when a customer account model function
+sends data back to the studio package controller.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The data that the customer account
+controller receives</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>status</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The status of the function. It is set to
+&quot;SUCCESS&quot; if function executed successfully, otherwise it is set to &quot;FAIL: &quot;
+followed by the error message.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Returns the expected result of the
+function. Refer to the function documentation to see the possible
+values for this field.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_customerAccountModel.js.html">models/customerAccountModel.js</a>, <a href="models_customerAccountModel.js.html#line514">line 514</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

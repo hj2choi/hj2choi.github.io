@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/customerCreditModel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/customerCreditModel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Customer Credit Model
+ */
+ var pgp = require("pg-promise")();
+ var db = pgp(process.env.DATABASE_URL);
+
+module.exports = {
+  // gets the credits of a customer
+  getCredits: function(customerId, callback) {
+    console.log("CALLED");
+    // gets credits if row exists, otherwise create the row
+    db.one("WITH get_credit AS ( " +
+              "SELECT * " +
+              "FROM customer_credit " +
+              "WHERE customer_id = $1 " +
+           "), insert_credit AS ( " +
+              "INSERT INTO customer_credit (customer_id, credit) " +
+              "SELECT $1, 0 " +
+              "WHERE NOT EXISTS (SELECT 1 FROM get_credit) " +
+              "RETURNING * " +
+           ") " +
+           "SELECT * FROM get_credit UNION ALL " +
+           "SELECT * FROM insert_credit", customerId)
+    .catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Get credits failed: " + error);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    });
+  },
+  // replace the current credit value with a different value
+  replaceCreditValue: function(customerId, credit, callback) {
+    // updates if row exists, otherwise insert the row
+    // may be vulnerable to duplicate key violations, may need
+    // to migrate to new upsert functionality when PostgreSQL 9.5 comes out
+    db.one("WITH update_credit AS ( " +
+              "UPDATE customer_credit " +
+              "SET credit = $2 " +
+              "WHERE customer_id = $1 " +
+              "RETURNING *" +
+           "), insert_credit AS ( " +
+              "INSERT INTO customer_credit (customer_id, credit) " +
+              "SELECT $1, $2 " +
+              "WHERE NOT EXISTS (SELECT 1 FROM update_credit) " +
+              "RETURNING * " +
+           ") " +
+           "SELECT * FROM update_credit UNION ALL " +
+           "SELECT * FROM insert_credit", [customerId, credit])
+    .catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Replace credit value failed: " + error);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    });
+  },
+  // adds the current credit value with creditsToAdd (subtracts if
+  // creditsToAdd is negative)
+  modifyCreditValue: function(customerId, creditsToAdd, callback) {
+    // updates if row exists, create it with the value initialized
+    // to creditsToAdd if it does not
+    // has same caveats as replaceCreditValue
+    db.one("WITH update_credit AS ( " +
+              "UPDATE customer_credit " +
+              "SET credit = credit + $2 " +
+              "WHERE customer_id = $1 " +
+              "RETURNING *" +
+           "), insert_credit AS ( " +
+              "INSERT INTO customer_credit (customer_id, credit) " +
+              "SELECT $1, $2 " +
+              "WHERE NOT EXISTS (SELECT 1 FROM update_credit) " +
+              "RETURNING * " +
+           ") " +
+           "SELECT * FROM update_credit UNION ALL " +
+           "SELECT * FROM insert_credit", [customerId, creditsToAdd])
+    .catch(function(error) {
+      callback({
+        "status": "FAIL: " + error,
+        "result": null
+      });
+      console.log("Modify credit value failed: " + error);
+    }).then(function(result) {
+      callback({
+        "status": "SUCCESS",
+        "result": result
+      });
+    });
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Customer%252520Credit%252520Model.html">Customer Credit Model</a></li><li><a href="module-customerAccountController.html">customerAccountController</a></li><li><a href="module-customerAccountModel.html">customerAccountModel</a></li><li><a href="module-index.html">index</a></li><li><a href="module-messagesController.html">messagesController</a></li><li><a href="module-messagesModel.html">messagesModel</a></li><li><a href="module-messagesRoutes.html">messagesRoutes</a></li><li><a href="module-packageRoutes.html">packageRoutes</a></li><li><a href="module-passwordRecoveryModel.html">passwordRecoveryModel</a></li><li><a href="module-paymentModule.html">paymentModule</a></li><li><a href="module-profileRoutes.html">profileRoutes</a></li><li><a href="module-randomModule.html">randomModule</a></li><li><a href="module-scryptHelperModule.html">scryptHelperModule</a></li><li><a href="module-signUpRoutes.html">signUpRoutes</a></li><li><a href="module-studioAccountController.html">studioAccountController</a></li><li><a href="module-studioAccountModel.html">studioAccountModel</a></li><li><a href="module-studioPackagesController.html">studioPackagesController</a></li><li><a href="module-studioPackagesModel.html">studioPackagesModel</a></li><li><a href="module-testRoutes.html">testRoutes</a></li></ul><h3>Global</h3><ul><li><a href="global.html#jsTimezoneDetect">jsTimezoneDetect</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Dec 29 2015 14:02:35 GMT+0900 (Korea Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
