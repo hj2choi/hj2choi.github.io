@@ -28,11 +28,11 @@
               <b><i style="color: #0E6251;">Python, Numpy, OpenCV</i></b></br>
               <a href="https://github.com/hjchoi95/jigsaw_puzzle_solver">https://github.com/hjchoi95/jigsaw_puzzle_solver</a></br></br>
               <font size="3"><p>
-                slices image randomly and re-assemble them back to original image</br></br>
-                - assemble fragmented images with unknown orientation</br>
+                fragments and transforms image and re-assemble them back to original image</br></br>
+                - used simple RMSE for all-pairs image-edge distance matrix</br>
                 - <b>modified Prim's MST algorithm</b> for image assembly </br>
                 - implemented Priority Queue with <b>Linked Hashmap</b> </br>
-                - automatically switch to <b>parallel computation</b> for 100+@ image fragments </br>
+                - switch to <b>parallel computation</b> for large number of images </br>
               </font>
             </p>
   	      </div>
@@ -56,7 +56,7 @@
                 - on/off graphic features (wireframes, grids, sperical skybox) </br>
                 - dynamically create asteroid clusters + graphical optimization</br>
                 - visual features: realistic reflective properties, cloud layer, planatery ring</br></br>
-                <i>Jinseok Lee (CSE MPhil student) built core logic and data structure for planet and satellite revolution.</i>
+                <i>Jinseok Lee (CSE MPhil student) built core logic and JSON interface for planet and satellite revolution as well as some graphical features.</i>
               </font>
             </p>
   	      </div>
@@ -75,7 +75,10 @@
               <a href="https://www.guacamoli.ust.hk"><strike>https://www.guacamoli.ust.hk</strike></a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
               <a href="https://www.facebook.com/guacamoliust/">https://www.facebook.com/guacamoliust/</a></br>
               <b><a href="https://drive.google.com/file/d/1lA_WQP9jw7LMz4KVQpLmLpEupQyLuxjB/view?usp=sharing"> System Architecture </a></b></br></br>
-              <font size="3"><p>Web application for viewing and rating university canteen meal offereings and their nutritional values.</br></br>
+              <font size="3"><p>Web application for viewing and rating university canteen meal offereings.</br>
+                - separated test and production environment</br>
+                - automated thumbnail generation</br>
+                - DB backup, automatically restart service for any process termination</br></br>
                 <i><b>Back-end & Infrastructure:</b> Me </br>
                 Front-end dev: Nayeon Lee (CSE student)</br>
                 Project management: Jaewook Lee (GBUS student)</i></br>
@@ -95,8 +98,8 @@
               <b><i style="color: #0E6251;">C, POSIX, Unix-like OS</i></b></br>
               <a href="https://github.com/hjchoi95/shell">https://github.com/hjchoi95/shell</a></br></br>
               <font size="3">
-                  It behaves almost exactly as every other command-line user interface does in Unix-like Operating Systems.</br></br>
-                  - resolves all linux commands with argv </br>
+                  Replicate of Unix Shell</br></br>
+                  - resolves all linux commands with argv (fork child process)</br>
                   - run process in background with & </br>
                   - redirect stdin and stdout pipeline with < </br>
               </font>
@@ -117,9 +120,9 @@
               <font size="3"><p>Texas Hold'em based card game with AI and multiplayer capabilities.</br>
                                 - Single button for <b>automated matchmaking.</b></br>
                                 - Peer to Peer communication with <b>RPC (Remote Procedure Calls)</b></br>
-                                - player states are synchronized every step of the game.</br>
-                                - Implemented <b>Interpolation and Extrapolation</b> for smooth gameplay.</br></br>
-      			                    <i>Abishek (CSE/MAEC student) built hand evaluator logic, AI module and gameitem shop</i> </font>
+                                - Implemented <b>Interpolation and Extrapolation</b> for smooth gameplay.</br>
+                                - <b>PID control</b> for visually aesthetic card movements</br></br>
+      			                    <i>Abishek (CSE/MAEC student) built hand evaluator logic, AI module and upgrades store</i> </font>
             </p>
   	      </div>
         </div>
@@ -182,7 +185,7 @@
       			<font size="3"><p> Linux Paint application with QT which supports <b>image layers</b> and various drawing features
               such as shapes, <b>fill tool (watershed algorithm)</b>, color picker and more.<br>
               Implemeted <b>undo and redo</b> functionality as well. </br>
-              used <b>C++ Template</b> extensively to minimize code redundancy
+              used C++ Template extensively to minimize code redundancy
 
             </p></font>
   	      </div>
