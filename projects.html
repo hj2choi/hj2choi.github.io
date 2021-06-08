@@ -13,11 +13,11 @@
   <body>
 
 
+    <!-- background image -->
     <div class="compBackImage">
     </div>
 
     <div class="learn-more-dark">
-
       <div class="container">
     		<div class="row">
           <div class="col-md-6">
@@ -27,14 +27,12 @@
       			<h1>Fast Jigsaw Puzzle Solver</h1>
               <b><i style="color: #0E6251;">Python, Numpy, OpenCV</i></b></br>
               <a href="https://github.com/hj2choi/fast_jigsaw_puzzle_solver">https://github.com/hj2choi/fast_jigsaw_puzzle_solver</a></br></br>
-              <font size="3"><p>
-                fragments and transforms image and re-assemble them back to original image</br></br>
-                - used simple RMSE for all-pairs image-edge distance matrix</br>
-                - <b>modified Prim's MST algorithm</b> for image assembly </br>
-                - implemented Priority Queue with <b>Linked Hashmap</b> </br>
-                - switch to <b>parallel computation</b> for large number of images </br>
-              </font>
-            </p>
+
+              fragment and randomly transform image and re-assemble them back to original image</br></br></br>
+              - used Euclidean distance for all-pairs image-borders <b>similarity matrix</b> (for all orientations and stitching directions)</br>
+              - <b>modified Prim's MST algorithm</b> for image assembly </br>
+              - implemented Priority Queue with <b>Linked Hashmap</b> </br>
+              - switch to <b>parallel computation</b> for large number of images </br>
   	      </div>
         </div>
   	  </div>
@@ -50,15 +48,14 @@
               <b><i style="color: #0E6251;">JavaScript, WebGL, Three.js</i></b></br>
               <a href="https://hj2choi.github.io/solar_system_webgl/"><b>Live WebApp at hj2choi.github.io</b></a></br>
               <a href="https://github.com/hj2choi/solar_system_webgl">https://github.com/hj2choi/solar_system_webgl</a></br></br>
-              <font size="3"><p>
-                Solar System visualization with WebGL.</br></br>
-                - playback and camera controls </br>
-                - on/off graphic features (wireframes, grids, sperical skybox) </br>
-                - dynamically create asteroid clusters + graphical optimization</br>
-                - visual features: realistic reflective properties, cloud layer, planatery ring</br></br>
-                <i>Jinseok Lee (CSE MPhil student) built core logic and JSON data structure for planet and satellite revolution as well as some graphical features.</i>
-              </font>
-            </p>
+
+              Solar System visualization with WebGL.</br></br>
+              - playback and camera controls </br>
+              - on/off graphic features (wireframes, grids, sperical skybox) </br>
+              - dynamically create asteroid clusters & graphical optimization</br>
+              - visual features: realistic reflective properties, <b>cloud layer on Earth</b>, planatery ring</br></br>
+              <i style="color: #0E6251;"><b>Jinseok Lee</b> (CSE M.Phil student) built core logic and JSON data structure for planet and satellite revolution as well as some graphical features.</i>
+
   	      </div>
         </div>
   	  </div>
@@ -70,25 +67,25 @@
       			<img src="images/guacamoli.jpg" height="240px" style="margin: 20px 0px 0px 0px"></img>
   	      </div>
     	    <div class="col-md-6">
-      			<h1>Guacamoli</h1>
+      			<h1>guacamoli.ust.hk</h1>
               <b><i style="color: #0E6251;">Javascript, Node.js</i></b></br>
               <a href="https://www.guacamoli.ust.hk"><strike>https://www.guacamoli.ust.hk</strike></a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
               <a href="https://www.facebook.com/guacamoliust/">https://www.facebook.com/guacamoliust/</a></br>
               <b><a href="https://drive.google.com/file/d/1lA_WQP9jw7LMz4KVQpLmLpEupQyLuxjB/view?usp=sharing"> System Architecture </a></b></br></br>
-              <font size="3"><p>Web application for viewing and rating university canteen meal offereings.</br>
-                - separated test and production environment</br>
-                - automated thumbnail generation</br>
-                - DB backup, automatically restart service for any process termination</br></br>
-                <i><b>Back-end & Infrastructure:</b> Me </br>
-                Front-end dev: Nayeon Lee (CSE student)</br>
-                Project management: Jaewook Lee (GBUS student)</i></br>
-              </font>
-            </p>
+              Web application for viewing and rating university canteen meal offereings.</br>
+              Took charge in <b>Back-end & Infrastructure</b></br></br>
+              - separated test and production environment</br>
+              - automated thumbnail generation</br>
+              - DB backup, automatically restart service for any unexpected crash</br></br>
+
+              <i style="color: #0E6251;">Front-end dev: <b>Nayeon Lee</b> (CSE student)</br>
+              Project management: <b>Jaewook Lee</b> (GBUS student)</i></br>
+
   	      </div>
         </div>
   	  </div>
 
-      <div class="container">
+      <!--<div class="container">
     		<div class="row">
           <div class="col-md-6">
       			<img src="images/shell.JPG" height="200px" style="margin: 20px 0px 0px 0px"></img>
@@ -105,7 +102,8 @@
               </font>
   	      </div>
         </div>
-  	  </div>
+  	  </div>-->
+
 
   	  <div class="container">
     		<div class="row">
@@ -114,16 +112,17 @@
   	      </div>
     	    <div class="col-md-6">
       			<h1>Buy Poker</h1>
-              <b><i style="color: #0E6251;">C#, Unity</i></b></br>
-              <a href="https://github.com/hj2choi/Buy_Poker">https://github.com/hj2choi/Buy_Poker</a></br>
-              <a href="https://www.youtube.com/watch?v=tfntdDr3wCk&list=PLNSbvgT1taq0UmC5ZkHRGH7QHz3bVMArD">project presentation video link</a></br></br>
-              <font size="3"><p>Texas Hold'em based card game with AI and multiplayer capabilities.</br>
-                                - Single button for <b>automated matchmaking.</b></br>
-                                - Peer to Peer communication with <b>RPC (Remote Procedure Calls)</b></br>
-                                - Implemented <b>Interpolation and Extrapolation</b> for smooth gameplay.</br>
-                                - <b>PID control</b> for visually aesthetic card movements</br></br>
-      			                    <i>Abishek (CSE/MAEC student) built hand evaluator logic, AI module and upgrades store</i> </font>
-            </p>
+            <b><i style="color: #0E6251;">C#, Unity</i></b></br>
+            <a href="https://www.youtube.com/watch?v=tfntdDr3wCk&list=PLNSbvgT1taq0UmC5ZkHRGH7QHz3bVMArD"><b>project presentation video link</b></a></br>
+            <a href="https://github.com/hj2choi/Buy_Poker">https://github.com/hj2choi/Buy_Poker</a></br></br>
+            Texas Hold'em based card game with AI and multiplayer capabilities.</br>
+            </br>
+            - Single button for <b>automated matchmaking.</b></br>
+            - Peer to Peer communication with <b>RPC (Remote Procedure Calls)</b></br>
+            - Implemented <b>Interpolation and Extrapolation</b> for smooth gameplay.</br>
+            - <b>PID control</b> for visually aesthetic card movements</br></br>
+            <i style="color: #0E6251;"><b>Abishek</b> (CSE/MAEC student) built hand evaluator logic, AI module and upgrades store</i>
+
   	      </div>
         </div>
   	  </div>
@@ -137,18 +136,26 @@
       			<img src="images/regression.png" height="300px" style="margin: 20px 0px 0px 0px"></img>
   	      </div>
     	    <div class="col-md-6">
-      			<h1>Linear regression</h1>
-            <b><i style="color: #0E6251;">C++</i></b></br></br>
-      			<font size="3"><p>
-              <b>Manually implemented matrix operations and graphing functionality. </b></br></br>
-              Draws regression curve of any mathematical functions, using least square approximation.
+      			<h1>Least squares regressor program</h1>
+            <b><i style="color: #0E6251;">C++, OpenCV, Visual Studio</i></b></br>
+            <a href="https://github.com/hj2choi/personal_archives/blob/main/HKUST_minor_projects/least_squares_approximator_with_graph/src/Matrix.cpp">
+              https://github.com/hj2choi/personal_archives/.../Matrix.cpp
+            </a></br>
+            <a href="https://github.com/hj2choi/personal_archives/blob/main/HKUST_minor_projects/least_squares_approximator_with_graph/src/Graphing.cpp">
+              https://github.com/hj2choi/personal_archives/.../Graphing.cpp
+            </a></br></br>
 
-            </p></font>
+            <b>Manually implemented matrix operations and graphing functionality </b></br></br>
+            Draws regression curve of any mathematical functions <b>real time</b> <i>(polynomial, logarithms, trignometry functions, etc)</i></br></br>
+
+            used least squares approximation with <b>subspace projection</b> method
+
   	      </div>
         </div>
   	  </div>
     </div>
 
+    <!--
     <div class="learn-more-dark">
       <div class="container">
         <div class="row">
@@ -170,6 +177,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <div class="learn-more-dark">
   	  <div class="container">
@@ -182,12 +190,11 @@
       			<h1>Paint</h1>
             <b><i style="color: #0E6251;">C++, QT</i></b></br>
             <a href="https://github.com/hj2choi/qtPaint">https://github.com/hj2choi/qtPaint</a></br></br>
-      			<font size="3"><p> Linux Paint application with QT which supports <b>image layers</b> and various drawing features
-              such as shapes, <b>fill tool (watershed algorithm)</b>, color picker and more.<br>
-              Implemeted <b>undo and redo</b> functionality as well. </br>
-              used C++ Template extensively to minimize code redundancy
+      			Linux Paint application with QT which supports <b>image layers</b> and various drawing features </br></br>
+            - undo & redo: manually implemented <b>Stack</b> </br>
+            - image layers: <b>C++ Template</b> for code reusability</br>
+            - fill tool: <b>Watershed algorithm</b> (iterative version)</br>
 
-            </p></font>
   	      </div>
         </div>
   	  </div>
@@ -201,17 +208,19 @@
   	      </div>
     	    <div class="col-md-6">
       			<h1>2D Shooter game</h1>
-            <b><i style="color: #0E6251;">C#, Unity</i></b></br></br>
-      			<font size="3"><p>2D platformer shooting game with <b>parallex scrolling</b> and <b>search based AI</b>. </br></br>
-              AI players search and target nearest visible enemy, </br>
-              while keeping minimum distance between teammates (for aesthetic purposes) </br></br>
-              <b>Highly customizable weapon settings</b>, from bolt-action, to automatic rifles and shotgun.
-            </p></font>
+            <b><i style="color: #0E6251;">C#, Unity</i></b></br>
+            <a href="https://github.com/hj2choi/personal_archives/tree/main/HKUST_minor_projects/2D%20shooter%20game%20-%20Unity/03%20tech_prototype_ver.3_27122014/Assets">
+              https://github.com/hj2choi/personal_archives/.../2D%20shooter%20game%20-%20Unity/.../
+            </a></br></br>
+      			- <b>parallex scrolling</b> and <b>search based AI</b> </br>
+            - <b>Highly customizable weapon settings</b>: From bolt-action, to automatic rifles and shotgun
+
   	      </div>
         </div>
   	  </div>
     </div>
 
+    <!--
     <div class="learn-more-dark">
       <div class="container">
         <div class="row">
@@ -248,7 +257,8 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
+
 
     <div class="learn-more-dark">
       <div class="container">
@@ -257,17 +267,31 @@
             <img src="images/roguelike_rts.gif" height="200px" style="margin: 20px 0px 0px 50px"></img>
           </div>
           <div class="col-md-6">
-            <h2>Text-based 2D strategy game</h2>
-            <b><i style="color: #0E6251;">Java</i></b></br></br>
-            <font size="3"><p>Turn-based, text-based strategy game </br>
-              player have to build army and control strategic points to defeat his opponent. </br>
-              <b>AI player generates influence map</b> to decide whether to advance or retreat.
-            </p></font>
+            <h2>Turn-based 2D strategy game</h2>
+            <b><i style="color: #0E6251;">Java</i></b><br>
+            <a href="https://github.com/hj2choi/personal_archives/tree/main/Java_practice_materials/projects/Roguelike_RTS">
+              https://github.com/hj2choi/personal_archives/.../Roguelike_RTS
+            </a></br></br>
+
+            players raise army and control strategic points to defeat their opponents </br></br>
+
+            - <b>search based AI</b></br>
+            - AI player generates <b>influence map</b> for decision making
+
           </div>
         </div>
       </div>
     </div>
-    <br><br><br><br><br><br>
+    <br><br><br>
+
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-8 text">
+        <font size="4">
+          <br><br><br>
+          Last updated: 08.June.2021<br><br><br><br>
+        </font>
+    </div>
 
     <div id="sidebar" onmouseover="sidebarToggle()" onmouseout="sidebarToggleOut()" class="right-overlap">
       <div class="container">
