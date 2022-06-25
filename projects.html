@@ -21,7 +21,7 @@
       <div class="container">
     		<div class="row">
           <div class="col-md-6">
-      			<img src="images/jigsaw_puzzle_solver_fullsize.gif" height="320px" style="margin: 20px 0px 0px 0px"></img>
+      			<img src="images/jigsaw_puzzle_solver_2.gif" height="300px" style="margin: 20px 0px 0px 0px"></img>
   	      </div>
     	    <div class="col-md-6">
       			<h1>Fast Jigsaw Puzzle Solver</h1>
@@ -32,10 +32,9 @@
               re-assemble image fragments back to original image in <b>O(N<sup>2</b>) runtime</b>.</br>
               </br>
               </br>
-              - N x N x 32 (all 8 orientations & 4 stitching directions) shaped <b>similarity-matrix</b><br>
+              - Parallel 3D distance matrix computation</b><br>
               - Prim's <b>Minimum Spanning Tree</b> algorithm<br>
               - <b>Linked-Hashmap</b> implementation of Priority Queue<br>
-              - <b>Parallel processing</b></br>
   	      </div>
         </div>
   	  </div>
@@ -54,9 +53,9 @@
 
               Solar System visualization with WebGL.</br></br>
               - playback and camera controls </br>
-              - on/off graphic features (wireframes, grids, sperical skybox) </br>
-              - dynamically create asteroid clusters & graphical optimization</br>
-              - visual features: realistic reflective properties, <b>cloud layer on Earth</b>, planatery ring</br></br>
+              - on/off graphical features (wireframes, grids, sperical skybox) </br>
+              - dynamic asteroid clusters creation </br>
+              - visual features: realistic reflective properties, cloud layer on Earth, planatery ring</br></br>
               <i style="color: #0E6251;"><b>Jinseok Lee</b> (CSE M.Phil student) built core logic and JSON data structure for planet and satellite revolution as well as some graphical features.</i>
 
   	      </div>
@@ -79,9 +78,8 @@
               Web application for viewing and rating university canteen meal offereings.</br>
               <br>
               - Took charge in <b>Back-end & Infrastructure</b></br>
-              - same codebase for <b>local</b>, <b>test</b>, and <b>production</b> environment</br>
-              - automated thumbnail generation</br>
-              - DB backup, automatically restart service for any unexpected crash</br></br>
+              - setup <b>local</b>, <b>dev</b>, and <b>production</b> environment</br>
+              - automated thumbnail generation</br></br>
 
               <i style="color: #0E6251;">Front-end dev: <b>Nayeon Lee</b> (CSE student)</br>
               Project management: <b>Jaewook Lee</b> (GBUS student)</i></br>
@@ -122,7 +120,7 @@
             <a href="https://github.com/hj2choi/Buy_Poker">https://github.com/hj2choi/Buy_Poker</a></br></br>
             Texas Hold'em based card game with AI and multiplayer capabilities.</br>
             </br>
-            - Single button for <b>automated matchmaking.</b></br>
+            - Single button for automated 1v1 match finder</br>
             - Implemented <b>Interpolation</b> and <b>Extrapolation</b> for smooth gameplay.</br>
             - <b>PID control</b> for visually aesthetic card movements</br></br>
             <i style="color: #0E6251;"><b>Abishek</b> (CSE/MAEC student) built hand evaluator logic, AI module and upgrades store</i>
@@ -150,9 +148,9 @@
             </a></br></br>
 
             <b>Manually implemented matrix operations and graphing functionality. </b></br></br>
-            Draws regression curve of any mathematical functions <b>interactively</b>. <i>(polynomial, logarithms, trignometry functions, etc)</i></br></br>
+            - interactively draws regression curve of any mathematical functions <i>(polynomial, logarithms, trignometry functions, etc)</i></br></br>
 
-            used least squares approximation with <b>subspace projection</b> method.
+            - least squares approximation with subspace projection.
 
   	      </div>
         </div>
@@ -188,17 +186,14 @@
     		<div class="row">
           <div class="col-md-1"></div>
           <div class="col-md-5">
-      			<img src="images/paint.gif" height="300px" style="margin: 20px 0px 0px 0px"></img>
+      			<img src="images/paint.gif" height="280px" style="margin: 20px 0px 0px 0px"></img>
   	      </div>
     	    <div class="col-md-6">
       			<h1>Paint</h1>
             <b><i style="color: #0E6251;">C++, QT</i></b></br>
             <a href="https://github.com/hj2choi/qtPaint">https://github.com/hj2choi/qtPaint</a></br></br>
       			Linux Paint application with QT which supports <b>image layers</b> and various drawing features </br></br>
-            - undo & redo: manually implemented <b>Stack</b> </br>
-            - image layers: <b>C++ Template</b> for code reusability</br>
-            - fill tool: <b>Watershed algorithm</b> (iterative version)</br>
-
+            - image layers, undo & redo, and fill tool with watershed algorithm</br>
   	      </div>
         </div>
   	  </div>
@@ -244,6 +239,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <div class="learn-more-dark">
       <div class="container">
@@ -254,17 +250,15 @@
           <div class="col-md-6">
             <h2>Pathfinder</h2>
             <b><i style="color: #0E6251;">Java, Greenfoot</i></b></br></br>
-            <font size="3"><p>Computes best path from source to destination, corresponding to cost matrix.<br>
-              Implemented djikstra algorithm.
-
-            </p></font>
+            <p>- Computes best path from source to destination.<br>
+            </p>
           </div>
         </div>
       </div>
-    </div>-->
+    </div>
 
 
-    <div class="learn-more-dark">
+    <!--<div class="learn-more-dark">
       <div class="container">
         <div class="row">
           <div class="col-md-6">
@@ -285,7 +279,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
     <br><br><br>
 
     <div class="col-md-2">
@@ -305,8 +299,8 @@
               <h3><button type="button" onclick="pinSidebar()" class="btn btn-lg btn-default">⇩ My profile</button></h3>
               <li><p><a href="index.html" id="b"><span class="glyphicon glyphicon-home gi-10x"></span></a></p></li>
               <!--<li><p><a href="timeline.html"><span class="glyphicon glyphicon-user gi-10x"></span></a></p></li>-->
-              <li><p><a href="experiences.html"><span class="glyphicon glyphicon-road gi-10x"></span></a></p></li>
               <li><p><a href="projects.html"><span class="glyphicon glyphicon-file gi-10x"></span></a></p></li>
+              <li><p><a href="experiences.html"><span class="glyphicon glyphicon-road gi-10x"></span></a></p></li>
               <!--<li><p><a href="contactMe.html"><span class="glyphicon glyphicon-envelope gi-10x"></span></a></p></li>-->
             </ul>
           </div>
@@ -317,8 +311,8 @@
               <h3><button type="button" onclick="pinSidebar()" class="btn btn-lg btn-default">⇩ My profile</button></h3>
               <li><p><a href="index.html"><span class="glyphicon glyphicon-home"><a href="index.html"style="font-family:Helvetica;">  Profile</a></span></a></p></li>
               <!--<li><p><a href="timeline.html"><span class="glyphicon glyphicon-user gi-10x"><a href="timeline.html"style="font-family:Helvetica;">  Timeline</a></span></a></p></li>-->
-              <li><p><a href="experiences.html"><span class="glyphicon glyphicon-road gi-10x"><a href="experiences.html"style="font-family:Helvetica;">  Experiences </a></span></a></p></li>
               <li><p><a href="projects.html"><span class="glyphicon glyphicon-file gi-10x"><a href="projects.html"style="font-family:Helvetica;">  Software Projects</a></span></a></p></li>
+              <li><p><a href="experiences.html"><span class="glyphicon glyphicon-road gi-10x"><a href="experiences.html"style="font-family:Helvetica;">  Other Experiences </a></span></a></p></li>
               <!--<li><p><a href="contactMe.html"><span class="glyphicon glyphicon-envelope gi-10x"><a href="contactMe.html"style="font-family:Helvetica;">  Contact</a></span></a></p></li>-->
             </ul>
           </div>
